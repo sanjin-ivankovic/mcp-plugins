@@ -1,0 +1,45 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Renovate configuration for mcp-plugins (Python server, pinned MCP servers, CI)",
+  "dependencyDashboardTitle": "Renovate Dashboard: mcp-plugins",
+  "extends": [
+    "local>homelab/renovate",
+    "local>homelab/renovate:ci-components"
+  ],
+  "enabledManagers": ["pep621", "pyenv", "gitlabci", "custom.regex"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "npm MCP servers pinned as <pkg>@<version> in plugin.json and the kubernetes wrapper",
+      "managerFilePatterns": [
+        "/^plugins/homelab/\\.claude-plugin/plugin\\.json$/",
+        "/^plugins/homelab/scripts/run-kubernetes-mcp\\.sh$/"
+      ],
+      "matchStrings": [
+        "(?<depName>argocd-mcp|longhorn-mcp|kubernetes-mcp-server)@(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "datasourceTemplate": "npm"
+    },
+    {
+      "customType": "regex",
+      "description": "uv version used by the CI test job",
+      "managerFilePatterns": ["/^\\.gitlab-ci\\.yml$/"],
+      "matchStrings": ["UV_VERSION: \"(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "uv",
+      "datasourceTemplate": "pypi"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Third-party MCP servers run with credentials on the operator's machine: soak new releases before pinning them.",
+      "matchDepNames": ["argocd-mcp", "longhorn-mcp", "kubernetes-mcp-server", "mcp"],
+      "minimumReleaseAge": "14 days"
+    },
+    {
+      "description": "One Python version in two places: plugins/homelab/server/.python-version (pyenv manager; what uv runs locally and in the plugin) and the python image of the CI test job (gitlabci manager). Bumped separately, uv finds no matching interpreter in the image and test:python fails before any test runs, so they move in one MR.",
+      "matchDatasources": ["docker"],
+      "matchDepNames": ["python"],
+      "groupName": "Python"
+    }
+  ]
+}

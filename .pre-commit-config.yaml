@@ -1,0 +1,83 @@
+# LOCAL developer hooks only. CI does NOT run pre-commit; the equivalent
+# checks run as native jobs in .gitlab-ci.yml (scan:secrets, lint:*,
+# test:python). Run `make setup` once; CI is the authoritative gate.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: ['--allow-multiple-documents']
+      - id: check-added-large-files
+        # Block accidentally committing big blobs; 500kb clears all legit files.
+        args: ['--maxkb=500']
+      - id: check-merge-conflict
+      - id: detect-private-key
+      # Catch filenames that collide on case-insensitive filesystems.
+      - id: check-case-conflict
+      # Normalize to LF; CRLF breaks shell scripts + diffs.
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+      # A non-executable script (or executable non-script) is a latent bug.
+      # Exclude vendored .claude/ skill docs (we don't manage their perms).
+      - id: check-executables-have-shebangs
+        exclude: '^\.claude/'
+      - id: check-shebang-scripts-are-executable
+        exclude: '^\.claude/'
+      # Validate JSON syntax.
+      - id: check-json
+
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+        # -c: centralize rules in .config/ (shared with CI + editor).
+        args: ['-c', '.config/.yamllint']
+
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.24.0
+    hooks:
+      - id: markdownlint-cli2
+        # --config: same .config/ file the VS Code extension uses.
+        args: ['--config', '.config/.markdownlint-cli2.jsonc']
+
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.5.0
+    hooks:
+      - id: conventional-pre-commit
+        # commit-msg stage: validates the commit MESSAGE, not files — runs
+        #   on `git commit`; `pre-commit run --all-files` (CI) skips it.
+        stages: [commit-msg]
+        # Positional args = allowed Conventional Commit types.
+        args: ['feat', 'fix', 'docs', 'refactor', 'chore', 'test', 'ci', 'build']
+
+  # Local system hooks: the binaries ci-base pins (gitleaks, shellcheck)
+  # and the server's own uv environment (ruff at its pyproject pin).
+  - repo: local
+    hooks:
+      - id: gitleaks
+        name: gitleaks (system)
+        # `git` (history) mode scans TRACKED content and respects .gitignore.
+        # --platform=gitlab matches the CI scan:secrets job and the real origin
+        # (source.example.com is GitLab) so finding links resolve correctly.
+        entry: gitleaks git --platform=gitlab --config .config/.gitleaks.toml --gitleaks-ignore-path .config/.gitleaksignore --redact --verbose --exit-code 1 .
+        language: system
+        pass_filenames: false
+      - id: shellcheck
+        name: shellcheck (system)
+        entry: shellcheck --rcfile=.config/.shellcheckrc
+        language: system
+        types: [shell]
+      - id: check-manifests
+        name: plugin manifests (system)
+        entry: python3 .ci/check_manifests.py
+        language: system
+        pass_filenames: false
+        files: '(\.claude-plugin/.*\.json|pyproject\.toml)$'
+      - id: ruff
+        name: ruff (uv)
+        entry: bash -c 'cd plugins/homelab/server && uv run ruff check src tests && uv run ruff format --check src tests'
+        language: system
+        pass_filenames: false
+        files: '^plugins/homelab/server/.*\.py$'

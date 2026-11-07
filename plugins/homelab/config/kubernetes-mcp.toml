@@ -1,0 +1,11 @@
+# kubernetes-mcp-server settings. The CLI flags in run-kubernetes-mcp.sh repeat
+# read_only and toolsets so a release that drops either form still fails safe.
+read_only = true
+toolsets = ["core"]
+
+# RBAC already denies Secrets to mcp-reader; this keeps the tools from even
+# asking, so a mis-bound kubeconfig still does not return Secret data.
+[[denied_resources]]
+group = ""
+version = "v1"
+kind = "Secret"

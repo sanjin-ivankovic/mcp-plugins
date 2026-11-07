@@ -1,0 +1,113 @@
+{
+  "name": "homelab",
+  "version": "0.5.0",
+  "description": "Read-only MCP servers for the homelab: PVE, PBS, Unraid, Technitium, Pi-hole, Komodo, Semaphore and drift (custom), plus ArgoCD, Kubernetes, Longhorn and GitLab",
+  "author": {
+    "name": "homelab"
+  },
+  "license": "MIT",
+  "keywords": ["homelab", "proxmox", "kubernetes", "argocd", "dns", "mcp"],
+  "mcpServers": {
+    "homelab": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--quiet",
+        "--frozen",
+        "--project",
+        "${CLAUDE_PLUGIN_ROOT}/server",
+        "homelab-mcp",
+        "--config",
+        "${user_config.config_file}"
+      ]
+    },
+    "argocd": {
+      "command": "sh",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/scripts/with-secret.sh",
+        "ARGOCD_API_TOKEN=${user_config.argocd_token_file}",
+        "--",
+        "npx",
+        "-y",
+        "argocd-mcp@0.9.0",
+        "stdio"
+      ],
+      "env": {
+        "ARGOCD_BASE_URL": "${user_config.argocd_url}",
+        "MCP_READ_ONLY": "true"
+      }
+    },
+    "kubernetes": {
+      "command": "sh",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/scripts/run-kubernetes-mcp.sh",
+        "${user_config.kubeconfig}"
+      ]
+    },
+    "longhorn": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "longhorn-mcp@0.1.8",
+        "--longhorn-url=${user_config.longhorn_url}",
+        "--read-only"
+      ]
+    },
+    "gitlab": {
+      "type": "http",
+      "url": "${user_config.gitlab_url}/api/v4/mcp"
+    }
+  },
+  "userConfig": {
+    "config_file": {
+      "type": "string",
+      "title": "Config file",
+      "description": "Path to the homelab-mcp config.toml (systems, URLs, secret file paths)",
+      "default": "~/.config/homelab-mcp/config.toml"
+    },
+    "argocd_url": {
+      "type": "string",
+      "title": "ArgoCD URL",
+      "description": "ArgoCD base URL",
+      "default": "https://argo.example.com"
+    },
+    "argocd_token_file": {
+      "type": "string",
+      "title": "ArgoCD token file",
+      "description": "File holding the API token of the read-only `mcp` ArgoCD account",
+      "default": "~/.config/homelab-mcp/secrets/argocd"
+    },
+    "kubeconfig": {
+      "type": "string",
+      "title": "Read-only kubeconfig",
+      "description": "Kubeconfig of the mcp-reader ServiceAccount (never the admin one)",
+      "default": "~/.config/homelab-mcp/kubeconfig-readonly"
+    },
+    "longhorn_url": {
+      "type": "string",
+      "title": "Longhorn URL",
+      "description": "Longhorn manager API base URL (the UI host proxies /v1)",
+      "default": "https://longhorn.example.com"
+    },
+    "gitlab_url": {
+      "type": "string",
+      "title": "GitLab URL",
+      "description": "Self-managed GitLab base URL; its built-in MCP server lives at /api/v4/mcp",
+      "default": "https://source.example.com"
+    }
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/scripts/session-check.sh\" \"${user_config.config_file}\" \"${user_config.argocd_token_file}\" \"${user_config.kubeconfig}\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "homelab",
+  "description": "Private homelab plugins for Claude Code",
+  "owner": {
+    "name": "homelab"
+  },
+  "plugins": [
+    {
+      "name": "homelab",
+      "source": "./plugins/homelab",
+      "description": "Read-only MCP servers for the homelab: PVE, PBS, Unraid, Technitium, Pi-hole, Komodo, Semaphore, drift, plus ArgoCD, Kubernetes, Longhorn and GitLab"
+    }
+  ]
+}
