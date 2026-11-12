@@ -1,0 +1,13 @@
+---
+# Exceptions to the homelab repo standard (ci-components
+# docs/REPO-STANDARD.md), checked by the lint:repo-standard job. Each reason
+# starts with accepted:, fix: or investigate:. An entry whose rule passes
+# fails the check, so remove it with the fix.
+exceptions:
+  config-drift:
+    .config/.markdownlint-cli2.jsonc: >-
+      accepted: also ignores plugins/*/skills/**, which are agent
+      instructions like .claude/
+    .config/.gitleaks.toml: >-
+      accepted: drops the Kubernetes manifest rules; this repo holds the
+      MCP server and plugin manifests

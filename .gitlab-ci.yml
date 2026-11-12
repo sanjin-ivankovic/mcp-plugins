@@ -1,0 +1,88 @@
+---
+# CI for mcp-plugins: secret scan, lint (shared components), Python tests and
+# a manifest check. No image build and no deploy: the plugin is installed
+# from this repo by `claude plugin marketplace add`. The GitHub mirror runs
+# on the "GitHub Mirror" schedule (SCHEDULE_TYPE=mirror) like every other
+# mirrored repo.
+default:
+  tags:
+    - docker
+  interruptible: true
+
+workflow:
+  auto_cancel:
+    on_new_commit: interruptible
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+    - when: never
+
+stages:
+  - scan
+  - lint
+  - test
+  - mirror
+
+variables:
+  CI_IMAGE: $HARBOR_HOST/homelab/ci-components/ci:latest
+  UV_VERSION: "0.13.7"
+
+include:
+  - component: $CI_SERVER_FQDN/homelab/ci-components/scan-secrets@4.4.0
+  - component: $CI_SERVER_FQDN/homelab/ci-components/lint-commits@4.4.0
+  # The repo against ci-components docs/REPO-STANDARD.md; exceptions in
+  # .ci/repo-standard.yaml.
+  - component: $CI_SERVER_FQDN/homelab/ci-components/lint-repo-standard@4.4.0
+  - component: $CI_SERVER_FQDN/homelab/ci-components/lint-markdown@4.4.0
+  - component: $CI_SERVER_FQDN/homelab/ci-components/lint-shell@4.4.0
+  - component: $CI_SERVER_FQDN/homelab/ci-components/lint-yaml@4.4.0
+  # Sanitized GitHub portfolio mirror (ci-base carries the /opt/ci tooling).
+  # Failure alert for main pipelines (ntfy topic gitlab-pipelines).
+  - component: $CI_SERVER_FQDN/homelab/ci-components/notify-ntfy@4.4.0
+  - component: $CI_SERVER_FQDN/homelab/ci-components/mirror-github@4.4.0
+    inputs:
+      repo_name: mcp-plugins
+
+# The repo's own jobs run on MRs and main pushes only, each when its files
+# change; a schedule pipeline carries just the mirror.
+
+# The check reads the two plugin manifests, pyproject.toml and __init__.py.
+lint:manifests:
+  stage: lint
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - changes:
+        - .claude-plugin/**/*
+        - plugins/*/.claude-plugin/**/*
+        - plugins/homelab/server/pyproject.toml
+        - plugins/homelab/server/src/homelab_mcp/__init__.py
+        - .ci/check_manifests.py
+  image: $CI_IMAGE
+  script:
+    - python3 .ci/check_manifests.py
+
+test:python:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - changes:
+        - plugins/homelab/server/**/*
+  stage: test
+  image: python:3.15-slim@sha256:94d3426f1def7db4a106a232ac121bfd975393e5dfd40a619b955fae45fe7913
+  variables:
+    UV_CACHE_DIR: $CI_PROJECT_DIR/.uv-cache
+    UV_PYTHON_DOWNLOADS: never
+  cache:
+    key:
+      files: [plugins/homelab/server/uv.lock]
+    paths: [.uv-cache]
+  before_script:
+    - pip install --quiet "uv==$UV_VERSION"
+    - cd plugins/homelab/server
+    - uv sync --frozen
+  script:
+    - uv run ruff check src tests
+    - uv run ruff format --check src tests
+    - uv run pytest

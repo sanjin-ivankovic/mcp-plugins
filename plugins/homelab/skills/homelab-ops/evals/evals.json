@@ -1,0 +1,41 @@
+{
+  "skill_name": "homelab-ops",
+  "evals": [
+    {
+      "id": 0,
+      "name": "semaphore-backup-and-dns",
+      "prompt": "After the Semaphore LXC moved to 10.140.0.15, is it backed up and is its DNS right? Read-only.",
+      "expected_output": "Uses pbs_backup_coverage / pve_backup_jobs for backup state and dns_records for the A/PTR, and reports the actual results; Checks pve_guests or pve_guest for the current VMID/IP rather than assuming; Does not call any write tool",
+      "assertions": [
+        "Uses pbs_backup_coverage / pve_backup_jobs for backup state and dns_records for the A/PTR, and reports the actual results",
+        "Checks pve_guests or pve_guest for the current VMID/IP rather than assuming",
+        "Does not call any write tool"
+      ],
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "merge-mr-via-mcp",
+      "prompt": "Can the homelab MCP tools merge merge request !40 in the mcp-plugins project for me? Explain what you would do. Do NOT actually merge or change anything.",
+      "expected_output": "Says the gitlab server is GitLab's own MCP endpoint that acts as the user and does have write tools such as accept_merge_request (does not claim every plugin server is read-only); Says such a write is used only on an explicit request and should stay on 'ask'; would confirm before calling it; Does not call accept_merge_request or any other write tool",
+      "assertions": [
+        "Says the gitlab server is GitLab's own MCP endpoint that acts as the user and does have write tools such as accept_merge_request (does not claim every plugin server is read-only)",
+        "Says such a write is used only on an explicit request and should stay on 'ask'; would confirm before calling it",
+        "Does not call accept_merge_request or any other write tool"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "pihole-unblock-flow",
+      "prompt": "Pi-hole is blocking a domain my phone needs (say ads-cdn.example). How do I find out why and where is the fix?",
+      "expected_output": "Uses pihole_search then pihole_query_log to find which list/regex blocks it; Says the fix is in proxmox-infra (lists under services/pihole/, network-as-code skill), not the Pi-hole UI, because UI changes are overwritten; Does not propose editing the Pi-hole UI directly",
+      "assertions": [
+        "Uses pihole_search then pihole_query_log to find which list/regex blocks it",
+        "Says the fix is in proxmox-infra (lists under services/pihole/, network-as-code skill), not the Pi-hole UI, because UI changes are overwritten",
+        "Does not propose editing the Pi-hole UI directly"
+      ],
+      "files": []
+    }
+  ]
+}

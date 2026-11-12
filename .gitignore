@@ -1,0 +1,19 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Local config and secrets never belong in this repo
+config.toml
+.env
+secrets/
+kubeconfig*
+.mcp.json
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp

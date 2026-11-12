@@ -1,0 +1,52 @@
+# Copy to ~/.config/homelab-mcp/config.toml (mode 600).
+# Secrets are never inline: use <name>_file (path; relative to this file's
+# directory) or <name>_command (argv list, no shell; stdout is the value).
+# A missing section only disables that system's tools.
+
+[repos]  # local checkouts used by drift_report / drift_render_check
+argo_apps = "~/Projects/homelab/argo-apps"
+proxmox_infra = "~/Projects/homelab/proxmox-infra"
+
+[pve]  # user mcp@pve, role PVEAuditor on /
+url = "https://pve.example.com:8006"
+token_id = "mcp@pve!readonly"
+token_secret_file = "secrets/pve"
+verify_tls = false
+
+[pbs]  # user mcp@pbs, role Audit on / for the user and the token
+url = "https://pbs.example.com:8007"
+token_id = "mcp@pbs!readonly"
+token_secret_file = "secrets/pbs"
+verify_tls = false
+
+[unraid]  # API key with role VIEWER
+url = "http://10.130.0.30/graphql"
+api_key_file = "secrets/unraid"
+
+[technitium]  # talk to the nodes directly, not through Traefik
+token_file = "secrets/technitium"
+nodes = [
+  { name = "ns1", url = "http://10.110.0.10:5380", dhcp = true },
+  { name = "ns2", url = "http://10.110.0.11:5380" },
+]
+
+[pihole]  # app password; file holds "<node> <password>" lines
+nodes = [
+  { name = "pihole-2", url = "http://10.110.0.13", credentials_file = "secrets/pihole" },
+]
+
+[komodo]  # API key of local user mcp (base permission Read)
+url = "http://10.140.0.14:9120"
+key_file = "secrets/komodo-key"
+secret_file = "secrets/komodo-secret"
+
+[semaphore]  # user mcp, project role Guest; host directly (ingress is OIDC login only)
+url = "http://10.140.0.15:3000"
+token_file = "secrets/semaphore"
+
+[argocd]  # account mcp, role:readonly (same token as the argocd MCP server)
+url = "https://argo.example.com"
+token_file = "secrets/argocd"
+
+[kubernetes]  # used by drift's sealedsecrets scope
+kubeconfig = "kubeconfig-readonly"
