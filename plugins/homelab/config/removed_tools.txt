@@ -1,0 +1,15 @@
+# Tool names that no longer exist, with their replacement: "old new" per line.
+# .ci/check_skill_tools.py fails when a consumer skill still uses an old name;
+# scripts/renamed-tools.sh (SessionStart) lists the files in the open project
+# and in ~/.claude that still do. It ships with the plugin, so keep it here.
+# 1.0.0: each homelab tool is named after its system's config section.
+dns_zones technitium_zones
+dns_records technitium_records
+dns_dhcp_scopes technitium_dhcp_scopes
+dns_dhcp_leases technitium_dhcp_leases
+dns_stats technitium_stats
+dns_query_log technitium_query_log
+alerts_active alertmanager_alerts
+alerts_silences alertmanager_silences
+drift_report homelab_drift_report
+drift_render_check homelab_drift_render_check

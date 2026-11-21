@@ -1,0 +1,427 @@
+{
+  "tools": [
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Web search through the homelab SearXNG. Returns ranked results (url, title, snippet, engines, score, published date) plus any direct answers, infoboxes, suggestions and engines that did not answer. Open promising results with searxng_fetch instead of answering from snippets.",
+      "inputSchema": {
+        "properties": {
+          "categories": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "SearXNG categories, e.g. general, it, news, science, repos",
+            "title": "Categories"
+          },
+          "engines": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Engine names to use instead of the defaults",
+            "title": "Engines"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Language code, e.g. en or de",
+            "title": "Language"
+          },
+          "limit": {
+            "default": 10,
+            "description": "Results to return, 1-50",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "default": 1,
+            "description": "Result page, from 1",
+            "title": "Page",
+            "type": "integer"
+          },
+          "query": {
+            "description": "Search terms; never internal names or IPs",
+            "title": "Query",
+            "type": "string"
+          },
+          "safesearch": {
+            "default": 0,
+            "description": "0 off, 1 moderate, 2 strict",
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "title": "Safesearch",
+            "type": "integer"
+          },
+          "time_range": {
+            "anyOf": [
+              {
+                "enum": [
+                  "day",
+                  "week",
+                  "month",
+                  "year"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Only recent results",
+            "title": "Time Range"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "searxng_searchArguments",
+        "type": "object"
+      },
+      "name": "searxng_search",
+      "outputSchema": {
+        "$defs": {
+          "Infobox": {
+            "properties": {
+              "content": {
+                "title": "Content",
+                "type": "string"
+              },
+              "name": {
+                "title": "Name"
+              },
+              "urls": {
+                "items": {},
+                "title": "Urls",
+                "type": "array"
+              }
+            },
+            "required": [
+              "name",
+              "content",
+              "urls"
+            ],
+            "title": "Infobox",
+            "type": "object"
+          },
+          "SearchHit": {
+            "description": "One result; empty fields are left out.",
+            "properties": {
+              "category": {
+                "title": "Category"
+              },
+              "engines": {
+                "items": {},
+                "title": "Engines",
+                "type": "array"
+              },
+              "published": {
+                "title": "Published"
+              },
+              "score": {
+                "title": "Score",
+                "type": "number"
+              },
+              "snippet": {
+                "title": "Snippet",
+                "type": "string"
+              },
+              "title": {
+                "title": "Title"
+              },
+              "url": {
+                "title": "Url"
+              }
+            },
+            "title": "SearchHit",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "answers": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Answers",
+            "type": "array"
+          },
+          "corrections": {
+            "items": {},
+            "title": "Corrections",
+            "type": "array"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "infoboxes": {
+            "items": {
+              "$ref": "#/$defs/Infobox"
+            },
+            "title": "Infoboxes",
+            "type": "array"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/$defs/SearchHit"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "query": {
+            "title": "Query"
+          },
+          "suggestions": {
+            "items": {},
+            "title": "Suggestions",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          },
+          "unresponsive_engines": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Unresponsive Engines",
+            "type": "array"
+          }
+        },
+        "required": [
+          "query",
+          "page",
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "Search",
+        "type": "object"
+      },
+      "title": "Web search"
+    },
+    {
+      "_meta": {
+        "anthropic/maxResultSizeChars": 70000
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "A web page as Markdown (headings, links and tables kept; navigation and ads dropped), read in chunks: max_length characters from start_index, and next_index when more remains. raw=true returns the body unconverted. Text, JSON and XML come back as they are; binary types are refused.",
+      "inputSchema": {
+        "properties": {
+          "max_length": {
+            "default": 5000,
+            "description": "Characters to return, 100-50000",
+            "title": "Max Length",
+            "type": "integer"
+          },
+          "raw": {
+            "default": false,
+            "description": "Return HTML unconverted",
+            "title": "Raw",
+            "type": "boolean"
+          },
+          "start_index": {
+            "default": 0,
+            "description": "Character offset to start at",
+            "title": "Start Index",
+            "type": "integer"
+          },
+          "url": {
+            "description": "http or https URL",
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "searxng_fetchArguments",
+        "type": "object"
+      },
+      "name": "searxng_fetch",
+      "outputSchema": {
+        "properties": {
+          "content": {
+            "title": "Content",
+            "type": "string"
+          },
+          "content_type": {
+            "title": "Content Type",
+            "type": "string"
+          },
+          "final_url": {
+            "title": "Final Url",
+            "type": "string"
+          },
+          "next_index": {
+            "title": "Next Index",
+            "type": "integer"
+          },
+          "start_index": {
+            "title": "Start Index",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "total_chars": {
+            "title": "Total Chars",
+            "type": "integer"
+          },
+          "truncated_download": {
+            "title": "Truncated Download",
+            "type": "boolean"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "final_url",
+          "status",
+          "content_type",
+          "total_chars",
+          "start_index",
+          "content"
+        ],
+        "title": "Fetched",
+        "type": "object"
+      },
+      "title": "Fetch web page"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "The SearXNG instance: version, categories, enabled engines (with the categories they serve) and whether the limiter is on. Use it to pick categories or engines for searxng_search.",
+      "inputSchema": {
+        "properties": {
+          "enabled_only": {
+            "default": true,
+            "description": "Leave out disabled engines",
+            "title": "Enabled Only",
+            "type": "boolean"
+          }
+        },
+        "title": "searxng_instanceArguments",
+        "type": "object"
+      },
+      "name": "searxng_instance",
+      "outputSchema": {
+        "$defs": {
+          "Engine": {
+            "properties": {
+              "categories": {
+                "title": "Categories"
+              },
+              "name": {
+                "title": "Name"
+              },
+              "shortcut": {
+                "title": "Shortcut"
+              },
+              "time_range": {
+                "title": "Time Range"
+              }
+            },
+            "required": [
+              "name",
+              "shortcut",
+              "categories",
+              "time_range"
+            ],
+            "title": "Engine",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "categories": {
+            "title": "Categories"
+          },
+          "engines": {
+            "items": {
+              "$ref": "#/$defs/Engine"
+            },
+            "title": "Engines",
+            "type": "array"
+          },
+          "instance_name": {
+            "title": "Instance Name"
+          },
+          "limiter": {
+            "title": "Limiter"
+          },
+          "safe_search": {
+            "title": "Safe Search"
+          },
+          "version": {
+            "title": "Version"
+          }
+        },
+        "required": [
+          "version",
+          "instance_name",
+          "limiter",
+          "safe_search",
+          "categories",
+          "engines"
+        ],
+        "title": "Instance",
+        "type": "object"
+      },
+      "title": "SearXNG engines"
+    }
+  ]
+}

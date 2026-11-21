@@ -1,0 +1,79 @@
+# Tool names of the third-party servers the consumer skills may name.
+# .ci/check_skill_tools.py accepts these besides the docs/TOOLS.md tools.
+# Add a name here only after checking it in a live session (/mcp);
+# make smoke-live fails when a name listed for a local server is gone.
+
+# argocd (argocd-mcp, MCP_READ_ONLY=true)
+get_application
+get_application_events
+get_application_managed_resources
+get_application_resource_tree
+get_application_workload_logs
+get_appproject
+get_resource_actions
+get_resource_events
+get_resources
+list_applications
+list_clusters
+
+# kubernetes (kubernetes-mcp-server, core toolset)
+api_resources_list
+events_list
+namespaces_list
+nodes_top
+pods_get
+pods_list
+pods_list_in_namespace
+pods_log
+pods_top
+resources_get
+resources_list
+
+# longhorn (longhorn-mcp --read-only), the names the skills use
+backup_list
+backupvolume_list
+longhorn_events
+node_list
+recurringjob_list
+setting_get
+snapshot_list
+volume_get
+volume_list
+volumeattachment_list
+
+# grafana (mcp-grafana --disable-write, Viewer service account)
+alerting_rules_read
+get_dashboard_panel_queries
+get_dashboard_summary
+list_loki_label_names
+list_loki_label_values
+list_prometheus_metric_names
+query_loki_logs
+query_loki_patterns
+query_prometheus
+search_dashboards
+
+# gitlab (GitLab's /api/v4/mcp); the write tools are named to warn about them
+accept_merge_request
+add_branch
+add_commit
+fork_repository
+get_commit
+get_job
+get_merge_request
+get_pipeline
+get_project
+get_repository_file
+link_work_items
+list_branches
+list_commits
+list_merge_requests
+list_pipelines
+list_releases
+list_repository_tree
+list_tags
+save_merge_request
+save_note
+save_pipeline
+save_work_item
+search

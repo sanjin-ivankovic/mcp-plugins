@@ -1,0 +1,1229 @@
+{
+  "tools": [
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "The Docmost spaces the member can see, with id, slug and name.",
+      "inputSchema": {
+        "properties": {},
+        "title": "docmost_list_spacesArguments",
+        "type": "object"
+      },
+      "name": "docmost_list_spaces",
+      "outputSchema": {
+        "$defs": {
+          "Space": {
+            "properties": {
+              "description": {
+                "title": "Description"
+              },
+              "id": {
+                "title": "Id"
+              },
+              "name": {
+                "title": "Name"
+              },
+              "slug": {
+                "title": "Slug"
+              }
+            },
+            "title": "Space",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/$defs/Space"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "SpaceList",
+        "type": "object"
+      },
+      "title": "List spaces"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "What a part of the handbook holds: the child pages of `page` (id, slug id or URL), or the root pages of the space when `page` is absent, expanded `depth` levels (1-3). Use it to find where a page belongs; use docmost_search_pages to find something by what it says.",
+      "inputSchema": {
+        "properties": {
+          "depth": {
+            "default": 1,
+            "description": "Levels to expand, 1-3",
+            "title": "Depth",
+            "type": "integer"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Page id, slug id or URL; the space root when absent",
+            "title": "Page"
+          },
+          "space": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Space slug; the configured space when absent",
+            "title": "Space"
+          }
+        },
+        "title": "docmost_browse_treeArguments",
+        "type": "object"
+      },
+      "name": "docmost_browse_tree",
+      "outputSchema": {
+        "$defs": {
+          "PageRow": {
+            "description": "A page; backend fields appear only when the page has them.",
+            "properties": {
+              "children": {
+                "items": {
+                  "$ref": "#/$defs/PageRow"
+                },
+                "title": "Children",
+                "type": "array"
+              },
+              "hasChildren": {
+                "title": "Haschildren"
+              },
+              "id": {
+                "title": "Id"
+              },
+              "parentPageId": {
+                "title": "Parentpageid"
+              },
+              "slugId": {
+                "title": "Slugid"
+              },
+              "title": {
+                "title": "Title"
+              },
+              "updatedAt": {
+                "title": "Updatedat"
+              },
+              "url": {
+                "title": "Url",
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "title": "PageRow",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/$defs/PageRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "space": {
+            "title": "Space",
+            "type": "string"
+          }
+        },
+        "required": [
+          "space",
+          "items"
+        ],
+        "title": "Tree",
+        "type": "object"
+      },
+      "title": "Browse handbook tree"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Full-text search over the handbook pages, ranked, each hit with a highlighted snippet. Search every space unless `space` (a slug) narrows it. Open promising hits with docmost_get_page instead of answering from snippets.",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "default": 10,
+            "description": "Hits to return, 1-50",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "query": {
+            "description": "Words to search for",
+            "title": "Query",
+            "type": "string"
+          },
+          "space": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Space slug; every space when absent",
+            "title": "Space"
+          },
+          "title_only": {
+            "default": false,
+            "description": "Match page titles only",
+            "title": "Title Only",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "docmost_search_pagesArguments",
+        "type": "object"
+      },
+      "name": "docmost_search_pages",
+      "outputSchema": {
+        "$defs": {
+          "Hit": {
+            "properties": {
+              "children": {
+                "items": {
+                  "$ref": "#/$defs/PageRow"
+                },
+                "title": "Children",
+                "type": "array"
+              },
+              "hasChildren": {
+                "title": "Haschildren"
+              },
+              "id": {
+                "title": "Id"
+              },
+              "parentPageId": {
+                "title": "Parentpageid"
+              },
+              "slugId": {
+                "title": "Slugid"
+              },
+              "snippet": {
+                "title": "Snippet",
+                "type": "string"
+              },
+              "space": {
+                "title": "Space"
+              },
+              "title": {
+                "title": "Title"
+              },
+              "updatedAt": {
+                "title": "Updatedat"
+              },
+              "url": {
+                "title": "Url",
+                "type": "string"
+              }
+            },
+            "required": [
+              "url",
+              "space",
+              "snippet"
+            ],
+            "title": "Hit",
+            "type": "object"
+          },
+          "PageRow": {
+            "description": "A page; backend fields appear only when the page has them.",
+            "properties": {
+              "children": {
+                "items": {
+                  "$ref": "#/$defs/PageRow"
+                },
+                "title": "Children",
+                "type": "array"
+              },
+              "hasChildren": {
+                "title": "Haschildren"
+              },
+              "id": {
+                "title": "Id"
+              },
+              "parentPageId": {
+                "title": "Parentpageid"
+              },
+              "slugId": {
+                "title": "Slugid"
+              },
+              "title": {
+                "title": "Title"
+              },
+              "updatedAt": {
+                "title": "Updatedat"
+              },
+              "url": {
+                "title": "Url",
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "title": "PageRow",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/$defs/Hit"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "HitList",
+        "type": "object"
+      },
+      "title": "Search handbook"
+    },
+    {
+      "_meta": {
+        "anthropic/maxResultSizeChars": 130000
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "One handbook page as Markdown, with its title, URL, breadcrumb path, labels, last update and outline of headings. Name it by id, slug id or URL. For a long page read the outline first and ask for one `section` (heading text or anchor), or page through with `offset` and `length`.",
+      "inputSchema": {
+        "properties": {
+          "length": {
+            "default": 20000,
+            "description": "Characters to return, 100-100000",
+            "title": "Length",
+            "type": "integer"
+          },
+          "offset": {
+            "default": 0,
+            "description": "Character offset into the body",
+            "title": "Offset",
+            "type": "integer"
+          },
+          "page": {
+            "description": "Page id, slug id or URL",
+            "title": "Page",
+            "type": "string"
+          },
+          "section": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Heading text or anchor; only that section",
+            "title": "Section"
+          }
+        },
+        "required": [
+          "page"
+        ],
+        "title": "docmost_get_pageArguments",
+        "type": "object"
+      },
+      "name": "docmost_get_page",
+      "outputSchema": {
+        "$defs": {
+          "Chunk": {
+            "properties": {
+              "markdown": {
+                "title": "Markdown",
+                "type": "string"
+              },
+              "nextOffset": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Nextoffset"
+              },
+              "offset": {
+                "title": "Offset",
+                "type": "integer"
+              },
+              "totalChars": {
+                "title": "Totalchars",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "offset",
+              "totalChars",
+              "nextOffset",
+              "markdown"
+            ],
+            "title": "Chunk",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "content": {
+            "$ref": "#/$defs/Chunk"
+          },
+          "createdAt": {
+            "title": "Createdat"
+          },
+          "id": {
+            "title": "Id"
+          },
+          "labels": {
+            "items": {},
+            "title": "Labels",
+            "type": "array"
+          },
+          "lastUpdatedBy": {
+            "title": "Lastupdatedby"
+          },
+          "outline": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Outline",
+            "type": "array"
+          },
+          "parentPageId": {
+            "title": "Parentpageid"
+          },
+          "path": {
+            "items": {},
+            "title": "Path",
+            "type": "array"
+          },
+          "slugId": {
+            "title": "Slugid"
+          },
+          "space": {
+            "title": "Space"
+          },
+          "title": {
+            "title": "Title"
+          },
+          "updatedAt": {
+            "title": "Updatedat"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "space",
+          "path",
+          "labels",
+          "lastUpdatedBy",
+          "outline",
+          "content"
+        ],
+        "title": "PageDoc",
+        "type": "object"
+      },
+      "title": "Read handbook page"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Recently updated handbook pages, newest first.",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "default": 20,
+            "description": "Pages to return, 1-100",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "space": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Space slug; the configured space when absent",
+            "title": "Space"
+          }
+        },
+        "title": "docmost_recent_changesArguments",
+        "type": "object"
+      },
+      "name": "docmost_recent_changes",
+      "outputSchema": {
+        "$defs": {
+          "PageRow": {
+            "description": "A page; backend fields appear only when the page has them.",
+            "properties": {
+              "children": {
+                "items": {
+                  "$ref": "#/$defs/PageRow"
+                },
+                "title": "Children",
+                "type": "array"
+              },
+              "hasChildren": {
+                "title": "Haschildren"
+              },
+              "id": {
+                "title": "Id"
+              },
+              "parentPageId": {
+                "title": "Parentpageid"
+              },
+              "slugId": {
+                "title": "Slugid"
+              },
+              "title": {
+                "title": "Title"
+              },
+              "updatedAt": {
+                "title": "Updatedat"
+              },
+              "url": {
+                "title": "Url",
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "title": "PageRow",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/$defs/PageRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "PageList",
+        "type": "object"
+      },
+      "title": "Recent handbook changes"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Saved versions of a page, newest first. Docmost saves a version a few minutes after an edit settles, so a fresh change may not be listed yet.",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "default": 20,
+            "description": "Versions to return, 1-100",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "description": "Page id, slug id or URL",
+            "title": "Page",
+            "type": "string"
+          }
+        },
+        "required": [
+          "page"
+        ],
+        "title": "docmost_list_versionsArguments",
+        "type": "object"
+      },
+      "name": "docmost_list_versions",
+      "outputSchema": {
+        "$defs": {
+          "Version": {
+            "properties": {
+              "createdAt": {
+                "title": "Createdat"
+              },
+              "id": {
+                "title": "Id"
+              },
+              "lastUpdatedBy": {
+                "title": "Lastupdatedby"
+              },
+              "title": {
+                "title": "Title"
+              }
+            },
+            "required": [
+              "lastUpdatedBy"
+            ],
+            "title": "Version",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/$defs/Version"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "VersionList",
+        "type": "object"
+      },
+      "title": "List page versions"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "One saved version of a page (id from docmost_list_versions), as plain text.",
+      "inputSchema": {
+        "properties": {
+          "version_id": {
+            "description": "Version id from docmost_list_versions",
+            "title": "Version Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version_id"
+        ],
+        "title": "docmost_get_versionArguments",
+        "type": "object"
+      },
+      "name": "docmost_get_version",
+      "outputSchema": {
+        "properties": {
+          "createdAt": {
+            "title": "Createdat"
+          },
+          "id": {
+            "title": "Id"
+          },
+          "lastUpdatedBy": {
+            "title": "Lastupdatedby"
+          },
+          "pageId": {
+            "title": "Pageid"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title"
+          }
+        },
+        "required": [
+          "lastUpdatedBy",
+          "text"
+        ],
+        "title": "VersionText",
+        "type": "object"
+      },
+      "title": "Read page version"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Pages that link to this page (incoming) or that it links to (outgoing).",
+      "inputSchema": {
+        "properties": {
+          "direction": {
+            "default": "incoming",
+            "description": "incoming: pages linking here; outgoing: its links",
+            "enum": [
+              "incoming",
+              "outgoing"
+            ],
+            "title": "Direction",
+            "type": "string"
+          },
+          "limit": {
+            "default": 50,
+            "description": "Pages to return, 1-100",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "description": "Page id, slug id or URL",
+            "title": "Page",
+            "type": "string"
+          }
+        },
+        "required": [
+          "page"
+        ],
+        "title": "docmost_get_backlinksArguments",
+        "type": "object"
+      },
+      "name": "docmost_get_backlinks",
+      "outputSchema": {
+        "$defs": {
+          "PageRow": {
+            "description": "A page; backend fields appear only when the page has them.",
+            "properties": {
+              "children": {
+                "items": {
+                  "$ref": "#/$defs/PageRow"
+                },
+                "title": "Children",
+                "type": "array"
+              },
+              "hasChildren": {
+                "title": "Haschildren"
+              },
+              "id": {
+                "title": "Id"
+              },
+              "parentPageId": {
+                "title": "Parentpageid"
+              },
+              "slugId": {
+                "title": "Slugid"
+              },
+              "title": {
+                "title": "Title"
+              },
+              "updatedAt": {
+                "title": "Updatedat"
+              },
+              "url": {
+                "title": "Url",
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "title": "PageRow",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/$defs/PageRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "PageList",
+        "type": "object"
+      },
+      "title": "Page links"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true,
+        "readOnlyHint": false
+      },
+      "description": "Create a handbook page from Markdown, under `parent` (id, slug id or URL) or at the space root, with optional labels. The title is the page title; do not repeat it as a heading in the Markdown. Returns the new page's id and URL.",
+      "inputSchema": {
+        "properties": {
+          "labels": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Labels to set",
+            "title": "Labels"
+          },
+          "markdown": {
+            "description": "Page body; no title heading",
+            "title": "Markdown",
+            "type": "string"
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Parent page id, slug id or URL; space root when absent",
+            "title": "Parent"
+          },
+          "space": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Space slug; the configured space when absent",
+            "title": "Space"
+          },
+          "title": {
+            "description": "Page title",
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "markdown"
+        ],
+        "title": "docmost_create_pageArguments",
+        "type": "object"
+      },
+      "name": "docmost_create_page",
+      "outputSchema": {
+        "$defs": {
+          "PageRow": {
+            "description": "A page; backend fields appear only when the page has them.",
+            "properties": {
+              "children": {
+                "items": {
+                  "$ref": "#/$defs/PageRow"
+                },
+                "title": "Children",
+                "type": "array"
+              },
+              "hasChildren": {
+                "title": "Haschildren"
+              },
+              "id": {
+                "title": "Id"
+              },
+              "parentPageId": {
+                "title": "Parentpageid"
+              },
+              "slugId": {
+                "title": "Slugid"
+              },
+              "title": {
+                "title": "Title"
+              },
+              "updatedAt": {
+                "title": "Updatedat"
+              },
+              "url": {
+                "title": "Url",
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "title": "PageRow",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "children": {
+            "items": {
+              "$ref": "#/$defs/PageRow"
+            },
+            "title": "Children",
+            "type": "array"
+          },
+          "hasChildren": {
+            "title": "Haschildren"
+          },
+          "id": {
+            "title": "Id"
+          },
+          "labels": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Labels",
+            "type": "array"
+          },
+          "parentPageId": {
+            "title": "Parentpageid"
+          },
+          "slugId": {
+            "title": "Slugid"
+          },
+          "title": {
+            "title": "Title"
+          },
+          "updatedAt": {
+            "title": "Updatedat"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "labels"
+        ],
+        "title": "Created",
+        "type": "object"
+      },
+      "title": "Create handbook page"
+    },
+    {
+      "annotations": {
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true,
+        "readOnlyHint": false
+      },
+      "description": "Change a handbook page: its Markdown body (`operation` replace, append or prepend) and/or its title. Read the page with docmost_get_page first; for a small fix send the whole corrected body with replace. Docmost keeps the old body in the page history.",
+      "inputSchema": {
+        "properties": {
+          "markdown": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "New body content",
+            "title": "Markdown"
+          },
+          "operation": {
+            "default": "replace",
+            "description": "replace the body, or append or prepend to it",
+            "enum": [
+              "replace",
+              "append",
+              "prepend"
+            ],
+            "title": "Operation",
+            "type": "string"
+          },
+          "page": {
+            "description": "Page id, slug id or URL",
+            "title": "Page",
+            "type": "string"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "New page title",
+            "title": "Title"
+          }
+        },
+        "required": [
+          "page"
+        ],
+        "title": "docmost_update_pageArguments",
+        "type": "object"
+      },
+      "name": "docmost_update_page",
+      "outputSchema": {
+        "$defs": {
+          "PageRow": {
+            "description": "A page; backend fields appear only when the page has them.",
+            "properties": {
+              "children": {
+                "items": {
+                  "$ref": "#/$defs/PageRow"
+                },
+                "title": "Children",
+                "type": "array"
+              },
+              "hasChildren": {
+                "title": "Haschildren"
+              },
+              "id": {
+                "title": "Id"
+              },
+              "parentPageId": {
+                "title": "Parentpageid"
+              },
+              "slugId": {
+                "title": "Slugid"
+              },
+              "title": {
+                "title": "Title"
+              },
+              "updatedAt": {
+                "title": "Updatedat"
+              },
+              "url": {
+                "title": "Url",
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "title": "PageRow",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "children": {
+            "items": {
+              "$ref": "#/$defs/PageRow"
+            },
+            "title": "Children",
+            "type": "array"
+          },
+          "hasChildren": {
+            "title": "Haschildren"
+          },
+          "id": {
+            "title": "Id"
+          },
+          "operation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operation"
+          },
+          "parentPageId": {
+            "title": "Parentpageid"
+          },
+          "slugId": {
+            "title": "Slugid"
+          },
+          "title": {
+            "title": "Title"
+          },
+          "updatedAt": {
+            "title": "Updatedat"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "operation"
+        ],
+        "title": "Updated",
+        "type": "object"
+      },
+      "title": "Update handbook page"
+    },
+    {
+      "annotations": {
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true,
+        "readOnlyHint": false
+      },
+      "description": "Add and/or remove labels (tags) on a handbook page by name.",
+      "inputSchema": {
+        "properties": {
+          "add": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Label names to add",
+            "title": "Add"
+          },
+          "page": {
+            "description": "Page id, slug id or URL",
+            "title": "Page",
+            "type": "string"
+          },
+          "remove": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Label names to remove",
+            "title": "Remove"
+          }
+        },
+        "required": [
+          "page"
+        ],
+        "title": "docmost_set_labelsArguments",
+        "type": "object"
+      },
+      "name": "docmost_set_labels",
+      "outputSchema": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "labels": {
+            "items": {},
+            "title": "Labels",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "labels"
+        ],
+        "title": "Labels",
+        "type": "object"
+      },
+      "title": "Set page labels"
+    }
+  ]
+}

@@ -1,0 +1,3100 @@
+{
+  "tools": [
+    {
+      "_meta": {
+        "anthropic/alwaysLoad": true
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "One-call health summary of every configured system (PVE, PBS, Unraid, Technitium, Pi-hole, Komodo, Semaphore, ArgoCD, Traefik, Alertmanager, ntfy, Vault). Each system is queried in parallel with a timeout; a failing system shows its error without hiding the others.",
+      "inputSchema": {
+        "properties": {},
+        "title": "homelab_overviewArguments",
+        "type": "object"
+      },
+      "name": "homelab_overview",
+      "outputSchema": {
+        "properties": {
+          "config_error": {
+            "title": "Config Error",
+            "type": "string"
+          },
+          "config_warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Config Warnings",
+            "type": "array"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Errors",
+            "type": "array"
+          },
+          "systems": {
+            "additionalProperties": true,
+            "title": "Systems",
+            "type": "object"
+          }
+        },
+        "required": [
+          "systems",
+          "errors"
+        ],
+        "title": "Overview",
+        "type": "object"
+      },
+      "title": "Homelab health overview"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Proxmox VE nodes: status, CPU/memory use, uptime, PVE version.",
+      "inputSchema": {
+        "properties": {},
+        "title": "pve_nodesArguments",
+        "type": "object"
+      },
+      "name": "pve_nodes",
+      "outputSchema": {
+        "properties": {
+          "nodes": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Nodes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "nodes"
+        ],
+        "title": "Nodes",
+        "type": "object"
+      },
+      "title": "Proxmox nodes"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "List LXC containers and VMs with status, tags and resource use. Filter by type (lxc|qemu), status (running|stopped) or tag.",
+      "inputSchema": {
+        "properties": {
+          "include_templates": {
+            "default": false,
+            "description": "Also list templates",
+            "title": "Include Templates",
+            "type": "boolean"
+          },
+          "limit": {
+            "default": 200,
+            "description": "Rows to return, 1-1000",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Guest status, e.g. running or stopped",
+            "title": "Status"
+          },
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Only guests carrying this Proxmox tag",
+            "title": "Tag"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "lxc",
+                  "qemu"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "lxc or qemu; both when absent",
+            "title": "Type"
+          }
+        },
+        "title": "pve_guestsArguments",
+        "type": "object"
+      },
+      "name": "pve_guests",
+      "outputSchema": {
+        "description": "At most ``limit`` items, how many there were, and whether some were cut.",
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {},
+            "title": "Items",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "Listing",
+        "type": "object"
+      },
+      "title": "Proxmox guests"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "One guest by VMID: config, live status and snapshots.",
+      "inputSchema": {
+        "properties": {
+          "vmid": {
+            "description": "Guest VMID",
+            "title": "Vmid",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "vmid"
+        ],
+        "title": "pve_guestArguments",
+        "type": "object"
+      },
+      "name": "pve_guest",
+      "outputSchema": {
+        "properties": {
+          "config": {
+            "additionalProperties": true,
+            "title": "Config",
+            "type": "object"
+          },
+          "guest": {
+            "additionalProperties": true,
+            "title": "Guest",
+            "type": "object"
+          },
+          "snapshots": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Snapshots",
+            "type": "array"
+          },
+          "status": {
+            "additionalProperties": true,
+            "title": "Status",
+            "type": "object"
+          }
+        },
+        "required": [
+          "guest",
+          "config",
+          "status",
+          "snapshots"
+        ],
+        "title": "Guest",
+        "type": "object"
+      },
+      "title": "Proxmox guest"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Storage pools on every node with usage percentage and content types.",
+      "inputSchema": {
+        "properties": {},
+        "title": "pve_storageArguments",
+        "type": "object"
+      },
+      "name": "pve_storage",
+      "outputSchema": {
+        "properties": {
+          "storage": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Storage",
+            "type": "array"
+          }
+        },
+        "required": [
+          "storage"
+        ],
+        "title": "Storage",
+        "type": "object"
+      },
+      "title": "Proxmox storage"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Recent cluster tasks (vzdump, start/stop, snapshots). errors_only keeps non-OK ones.",
+      "inputSchema": {
+        "properties": {
+          "errors_only": {
+            "default": false,
+            "description": "Only tasks that did not end OK",
+            "title": "Errors Only",
+            "type": "boolean"
+          },
+          "limit": {
+            "default": 50,
+            "description": "Rows to return, 1-1000",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "since_hours": {
+            "default": 48,
+            "description": "How far back to look, in hours",
+            "title": "Since Hours",
+            "type": "integer"
+          }
+        },
+        "title": "pve_tasksArguments",
+        "type": "object"
+      },
+      "name": "pve_tasks",
+      "outputSchema": {
+        "description": "At most ``limit`` items, how many there were, and whether some were cut.",
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {},
+            "title": "Items",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "Listing",
+        "type": "object"
+      },
+      "title": "Proxmox tasks"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Scheduled vzdump backup jobs and the guests that no backup job covers.",
+      "inputSchema": {
+        "properties": {},
+        "title": "pve_backup_jobsArguments",
+        "type": "object"
+      },
+      "name": "pve_backup_jobs",
+      "outputSchema": {
+        "properties": {
+          "jobs": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Jobs",
+            "type": "array"
+          },
+          "not_backed_up": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Not Backed Up",
+            "type": "array"
+          }
+        },
+        "required": [
+          "jobs",
+          "not_backed_up"
+        ],
+        "title": "BackupJobs",
+        "type": "object"
+      },
+      "title": "Proxmox backup jobs"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "PBS datastores: usage, estimated full date, last garbage collection.",
+      "inputSchema": {
+        "properties": {},
+        "title": "pbs_datastoresArguments",
+        "type": "object"
+      },
+      "name": "pbs_datastores",
+      "outputSchema": {
+        "properties": {
+          "datastores": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Datastores",
+            "type": "array"
+          }
+        },
+        "required": [
+          "datastores"
+        ],
+        "title": "Datastores",
+        "type": "object"
+      },
+      "title": "PBS datastores"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "PBS backups in every namespace unless ns names one (\"\" is the root). Without backup_id: one row per backup group (last backup time, count, namespace). With backup_type (vm|ct|host) and backup_id (e.g. the VMID): that group's snapshots with size and verify state.",
+      "inputSchema": {
+        "properties": {
+          "backup_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Backup id, e.g. the VMID; lists that group's snapshots",
+            "title": "Backup Id"
+          },
+          "backup_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "vm, ct or host",
+            "title": "Backup Type"
+          },
+          "datastore": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Datastore name; every datastore when absent",
+            "title": "Datastore"
+          },
+          "limit": {
+            "default": 100,
+            "description": "Rows to return, 1-1000",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "ns": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Namespace; every namespace when absent, \"\" for the root",
+            "title": "Ns"
+          }
+        },
+        "title": "pbs_snapshotsArguments",
+        "type": "object"
+      },
+      "name": "pbs_snapshots",
+      "outputSchema": {
+        "description": "At most ``limit`` items, how many there were, and whether some were cut.",
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {},
+            "title": "Items",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "Listing",
+        "type": "object"
+      },
+      "title": "PBS backups"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "PBS tasks (backup, verify, prune, garbage collection, sync). errors_only by default.",
+      "inputSchema": {
+        "properties": {
+          "errors_only": {
+            "default": true,
+            "description": "Only tasks that did not end OK",
+            "title": "Errors Only",
+            "type": "boolean"
+          },
+          "limit": {
+            "default": 50,
+            "description": "Rows to return, 1-1000",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "since_hours": {
+            "default": 72,
+            "description": "How far back to look, in hours",
+            "title": "Since Hours",
+            "type": "integer"
+          }
+        },
+        "title": "pbs_tasksArguments",
+        "type": "object"
+      },
+      "name": "pbs_tasks",
+      "outputSchema": {
+        "description": "At most ``limit`` items, how many there were, and whether some were cut.",
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {},
+            "title": "Items",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "Listing",
+        "type": "object"
+      },
+      "title": "PBS tasks"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Backup coverage: every PVE guest compared with the PBS backup groups of every datastore and namespace. Lists guests with no backup at all and guests whose newest backup is older than max_age_hours.",
+      "inputSchema": {
+        "properties": {
+          "max_age_hours": {
+            "default": 36,
+            "description": "Hours after which a guest's newest backup counts as too old",
+            "title": "Max Age Hours",
+            "type": "integer"
+          }
+        },
+        "title": "pbs_backup_coverageArguments",
+        "type": "object"
+      },
+      "name": "pbs_backup_coverage",
+      "outputSchema": {
+        "properties": {
+          "max_age_hours": {
+            "title": "Max Age Hours",
+            "type": "integer"
+          },
+          "missing": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Missing",
+            "type": "array"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "integer"
+          },
+          "stale": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Stale",
+            "type": "array"
+          }
+        },
+        "required": [
+          "ok",
+          "missing",
+          "stale",
+          "max_age_hours"
+        ],
+        "title": "Coverage",
+        "type": "object"
+      },
+      "title": "Backup coverage"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Unraid host: OS and Unraid/API versions, CPU, uptime, current CPU and memory use.",
+      "inputSchema": {
+        "properties": {},
+        "title": "unraid_systemArguments",
+        "type": "object"
+      },
+      "name": "unraid_system",
+      "outputSchema": {
+        "properties": {
+          "info": {
+            "title": "Info"
+          },
+          "metrics": {
+            "title": "Metrics"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "info"
+        ],
+        "title": "System",
+        "type": "object"
+      },
+      "title": "Unraid system"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Unraid array: state, capacity, and per-disk status, temperature and fill level for parity, data and cache disks.",
+      "inputSchema": {
+        "properties": {},
+        "title": "unraid_arrayArguments",
+        "type": "object"
+      },
+      "name": "unraid_array",
+      "outputSchema": {
+        "properties": {
+          "caches": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Caches",
+            "type": "array"
+          },
+          "capacity_used_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capacity Used Pct"
+          },
+          "disks": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Disks",
+            "type": "array"
+          },
+          "parities": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Parities",
+            "type": "array"
+          },
+          "state": {
+            "title": "State"
+          }
+        },
+        "required": [
+          "state",
+          "capacity_used_pct",
+          "parities",
+          "disks",
+          "caches"
+        ],
+        "title": "Array",
+        "type": "object"
+      },
+      "title": "Unraid array"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Docker containers on Unraid with state, image and autostart. state filters, e.g. RUNNING or EXITED.",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "default": 200,
+            "description": "Rows to return, 1-1000",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Container state, e.g. RUNNING or EXITED",
+            "title": "State"
+          }
+        },
+        "title": "unraid_dockerArguments",
+        "type": "object"
+      },
+      "name": "unraid_docker",
+      "outputSchema": {
+        "description": "At most ``limit`` items, how many there were, and whether some were cut.",
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {},
+            "title": "Items",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "Listing",
+        "type": "object"
+      },
+      "title": "Unraid containers"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Virtual machines defined on Unraid and their state.",
+      "inputSchema": {
+        "properties": {},
+        "title": "unraid_vmsArguments",
+        "type": "object"
+      },
+      "name": "unraid_vms",
+      "outputSchema": {
+        "properties": {
+          "domains": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Domains",
+            "type": "array"
+          }
+        },
+        "required": [
+          "domains"
+        ],
+        "title": "Vms",
+        "type": "object"
+      },
+      "title": "Unraid VMs"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Unraid user shares with size, used and free space.",
+      "inputSchema": {
+        "properties": {},
+        "title": "unraid_sharesArguments",
+        "type": "object"
+      },
+      "name": "unraid_shares",
+      "outputSchema": {
+        "properties": {
+          "shares": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Shares",
+            "type": "array"
+          }
+        },
+        "required": [
+          "shares"
+        ],
+        "title": "Shares",
+        "type": "object"
+      },
+      "title": "Unraid shares"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Unread Unraid notifications (alerts, warnings, info) with counts.",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "default": 20,
+            "description": "Notifications to return, 1-200",
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "title": "unraid_notificationsArguments",
+        "type": "object"
+      },
+      "name": "unraid_notifications",
+      "outputSchema": {
+        "properties": {
+          "items": {
+            "items": {},
+            "title": "Items",
+            "type": "array"
+          },
+          "unread": {
+            "title": "Unread"
+          }
+        },
+        "required": [
+          "unread",
+          "items"
+        ],
+        "title": "Notifications",
+        "type": "object"
+      },
+      "title": "Unraid notifications"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Technitium zones on every node with SOA serials, DNSSEC and sync state. problem_zones lists zones whose serials disagree or whose secondary sync failed.",
+      "inputSchema": {
+        "properties": {},
+        "title": "technitium_zonesArguments",
+        "type": "object"
+      },
+      "name": "technitium_zones",
+      "outputSchema": {
+        "properties": {
+          "problem_zones": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Problem Zones",
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          },
+          "zones": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Zones",
+            "type": "array"
+          }
+        },
+        "required": [
+          "zones",
+          "problem_zones",
+          "warnings"
+        ],
+        "title": "Zones",
+        "type": "object"
+      },
+      "title": "DNS zones"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Records of a zone (or of one name inside it) as stored on a node. Comments show ownership: 'Via ...' (DHCP) and 'Cluster managed record' are Technitium-owned.",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "default": 500,
+            "description": "Rows to return, 1-1000",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "One name inside the zone; the whole zone when absent",
+            "title": "Name"
+          },
+          "node": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Node name from the config; the first node when absent",
+            "title": "Node"
+          },
+          "zone": {
+            "description": "Zone name, e.g. example.test",
+            "title": "Zone",
+            "type": "string"
+          }
+        },
+        "required": [
+          "zone"
+        ],
+        "title": "technitium_recordsArguments",
+        "type": "object"
+      },
+      "name": "technitium_records",
+      "outputSchema": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {},
+            "title": "Items",
+            "type": "array"
+          },
+          "node": {
+            "title": "Node",
+            "type": "string"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "node",
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "Records",
+        "type": "object"
+      },
+      "title": "DNS records"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "DHCP scopes on the DHCP node (the one marked dhcp) with ranges and enabled state.",
+      "inputSchema": {
+        "properties": {
+          "node": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Node name from the config; the node marked dhcp when absent",
+            "title": "Node"
+          }
+        },
+        "title": "technitium_dhcp_scopesArguments",
+        "type": "object"
+      },
+      "name": "technitium_dhcp_scopes",
+      "outputSchema": {
+        "properties": {
+          "node": {
+            "title": "Node",
+            "type": "string"
+          },
+          "scopes": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Scopes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "node",
+          "scopes"
+        ],
+        "title": "Scopes",
+        "type": "object"
+      },
+      "title": "DHCP scopes"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "DHCP leases. search matches hostname, IP or MAC (case-insensitive substring).",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "default": 200,
+            "description": "Rows to return, 1-1000",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "node": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Node name from the config; the node marked dhcp when absent",
+            "title": "Node"
+          },
+          "scope": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Scope name; every scope when absent",
+            "title": "Scope"
+          },
+          "search": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Case-insensitive substring of hostname, IP or MAC",
+            "title": "Search"
+          }
+        },
+        "title": "technitium_dhcp_leasesArguments",
+        "type": "object"
+      },
+      "name": "technitium_dhcp_leases",
+      "outputSchema": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {},
+            "title": "Items",
+            "type": "array"
+          },
+          "node": {
+            "title": "Node",
+            "type": "string"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "node",
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "Leases",
+        "type": "object"
+      },
+      "title": "DHCP leases"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Dashboard statistics per node: query totals, NXDOMAIN/SERVFAIL counts, top clients and domains for the period.",
+      "inputSchema": {
+        "properties": {
+          "node": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Node name from the config; every node when absent",
+            "title": "Node"
+          },
+          "period": {
+            "default": "LastHour",
+            "description": "Time window of the statistics",
+            "enum": [
+              "LastHour",
+              "LastDay",
+              "LastWeek",
+              "LastMonth"
+            ],
+            "title": "Period",
+            "type": "string"
+          },
+          "top": {
+            "default": 10,
+            "description": "Entries in each top list",
+            "title": "Top",
+            "type": "integer"
+          }
+        },
+        "title": "technitium_statsArguments",
+        "type": "object"
+      },
+      "name": "technitium_stats",
+      "outputSchema": {
+        "additionalProperties": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "title": "technitium_statsDictOutput",
+        "type": "object"
+      },
+      "title": "DNS statistics"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Query log of a node via its installed query-logger app. Filter by domain (qname), client IP, or rcode (e.g. NxDomain, ServerFailure, Refused).",
+      "inputSchema": {
+        "properties": {
+          "client": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Client IP address",
+            "title": "Client"
+          },
+          "domain": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Query name to match",
+            "title": "Domain"
+          },
+          "limit": {
+            "default": 50,
+            "description": "Entries to return, 1-500",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "node": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Node name from the config; the first node when absent",
+            "title": "Node"
+          },
+          "rcode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Response code, e.g. NxDomain, ServerFailure or Refused",
+            "title": "Rcode"
+          }
+        },
+        "title": "technitium_query_logArguments",
+        "type": "object"
+      },
+      "name": "technitium_query_log",
+      "outputSchema": {
+        "properties": {
+          "entries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Entries",
+            "type": "array"
+          },
+          "logger": {
+            "title": "Logger"
+          },
+          "node": {
+            "title": "Node",
+            "type": "string"
+          },
+          "total": {
+            "title": "Total"
+          }
+        },
+        "required": [
+          "node",
+          "logger",
+          "total",
+          "entries"
+        ],
+        "title": "DnsQueryLog",
+        "type": "object"
+      },
+      "title": "DNS query log"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Pi-hole status per node: blocking state, versions (core/web/FTL/docker), gravity size, list and domain counts, FTL uptime and the number of diagnosis messages.",
+      "inputSchema": {
+        "properties": {},
+        "title": "pihole_statusArguments",
+        "type": "object"
+      },
+      "name": "pihole_status",
+      "outputSchema": {
+        "additionalProperties": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "title": "pihole_statusDictOutput",
+        "type": "object"
+      },
+      "title": "Pi-hole status"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Pi-hole statistics per node: total/blocked/forwarded/cached queries, reply types, top queried and blocked domains, top clients and upstreams with response times.",
+      "inputSchema": {
+        "properties": {
+          "node": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Node name from the config; every node when absent",
+            "title": "Node"
+          },
+          "top": {
+            "default": 10,
+            "description": "Entries in each top list, 1-100",
+            "title": "Top",
+            "type": "integer"
+          }
+        },
+        "title": "pihole_statsArguments",
+        "type": "object"
+      },
+      "name": "pihole_stats",
+      "outputSchema": {
+        "additionalProperties": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "title": "pihole_statsDictOutput",
+        "type": "object"
+      },
+      "title": "Pi-hole statistics"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Pi-hole query log of one node, newest first. Filter by domain, client IP, upstream or status (e.g. GRAVITY, REGEX, DENYLIST for blocked; FORWARDED, CACHE).",
+      "inputSchema": {
+        "properties": {
+          "client": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Client IP address",
+            "title": "Client"
+          },
+          "domain": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Domain to match",
+            "title": "Domain"
+          },
+          "limit": {
+            "default": 50,
+            "description": "Entries to return, 1-500",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "node": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Node name from the config; the first node when absent",
+            "title": "Node"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Query status, e.g. GRAVITY, REGEX, DENYLIST, FORWARDED or CACHE",
+            "title": "Status"
+          },
+          "upstream": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Upstream server that answered",
+            "title": "Upstream"
+          }
+        },
+        "title": "pihole_query_logArguments",
+        "type": "object"
+      },
+      "name": "pihole_query_log",
+      "outputSchema": {
+        "properties": {
+          "entries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Entries",
+            "type": "array"
+          },
+          "node": {
+            "title": "Node",
+            "type": "string"
+          },
+          "total": {
+            "title": "Total"
+          }
+        },
+        "required": [
+          "node",
+          "total",
+          "entries"
+        ],
+        "title": "QueryLog",
+        "type": "object"
+      },
+      "title": "Pi-hole query log"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Lists and domain entries of a node: adlists/allowlists (address, enabled, domain count, download status, last update) and exact/regex allow and deny entries.",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "default": 200,
+            "description": "Rows to return, 1-1000",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "node": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Node name from the config; the first node when absent",
+            "title": "Node"
+          }
+        },
+        "title": "pihole_listsArguments",
+        "type": "object"
+      },
+      "name": "pihole_lists",
+      "outputSchema": {
+        "$defs": {
+          "Listing": {
+            "description": "At most ``limit`` items, how many there were, and whether some were cut.",
+            "properties": {
+              "count": {
+                "title": "Count",
+                "type": "integer"
+              },
+              "items": {
+                "items": {},
+                "title": "Items",
+                "type": "array"
+              },
+              "truncated": {
+                "title": "Truncated",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "count",
+              "truncated",
+              "items"
+            ],
+            "title": "Listing",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "domains": {
+            "$ref": "#/$defs/Listing"
+          },
+          "lists": {
+            "$ref": "#/$defs/Listing"
+          },
+          "node": {
+            "title": "Node",
+            "type": "string"
+          }
+        },
+        "required": [
+          "node",
+          "lists",
+          "domains"
+        ],
+        "title": "Lists",
+        "type": "object"
+      },
+      "title": "Pi-hole lists"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Why is a domain blocked or allowed? Searches gravity lists and allow/deny entries on every node unless node is given. partial=true also matches subdomains.",
+      "inputSchema": {
+        "properties": {
+          "domain": {
+            "description": "Domain to look up",
+            "title": "Domain",
+            "type": "string"
+          },
+          "limit": {
+            "default": 20,
+            "description": "Maximum matches Pi-hole returns",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "node": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Node name from the config; every node when absent",
+            "title": "Node"
+          },
+          "partial": {
+            "default": false,
+            "description": "Also match subdomains",
+            "title": "Partial",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "domain"
+        ],
+        "title": "pihole_searchArguments",
+        "type": "object"
+      },
+      "name": "pihole_search",
+      "outputSchema": {
+        "additionalProperties": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "title": "pihole_searchDictOutput",
+        "type": "object"
+      },
+      "title": "Why a domain is blocked"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Pi-hole diagnosis messages per node: list download failures, rate-limited clients, DNSSEC or upstream problems, load and disk warnings.",
+      "inputSchema": {
+        "properties": {},
+        "title": "pihole_messagesArguments",
+        "type": "object"
+      },
+      "name": "pihole_messages",
+      "outputSchema": {
+        "additionalProperties": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "title": "pihole_messagesDictOutput",
+        "type": "object"
+      },
+      "title": "Pi-hole messages"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Query history of one node over the last 24 h in 10-minute slots (total, blocked, cached, forwarded). per_client=true returns the per-client series instead.",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "default": 150,
+            "description": "Ten-minute slots to return, 1-1000",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "node": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Node name from the config; the first node when absent",
+            "title": "Node"
+          },
+          "per_client": {
+            "default": false,
+            "description": "Split each slot by client",
+            "title": "Per Client",
+            "type": "boolean"
+          }
+        },
+        "title": "pihole_historyArguments",
+        "type": "object"
+      },
+      "name": "pihole_history",
+      "outputSchema": {
+        "$defs": {
+          "Listing": {
+            "description": "At most ``limit`` items, how many there were, and whether some were cut.",
+            "properties": {
+              "count": {
+                "title": "Count",
+                "type": "integer"
+              },
+              "items": {
+                "items": {},
+                "title": "Items",
+                "type": "array"
+              },
+              "truncated": {
+                "title": "Truncated",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "count",
+              "truncated",
+              "items"
+            ],
+            "title": "Listing",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "clients": {
+            "title": "Clients"
+          },
+          "history": {
+            "$ref": "#/$defs/Listing"
+          },
+          "node": {
+            "title": "Node",
+            "type": "string"
+          }
+        },
+        "required": [
+          "node",
+          "history"
+        ],
+        "title": "History",
+        "type": "object"
+      },
+      "title": "Pi-hole query history"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Tail of a Pi-hole log: ftl (FTL warnings), dnsmasq (per-query log) or webserver. Pass the returned next_id to read only newer lines.",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "default": 100,
+            "description": "Rows to return, 1-1000",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "next_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "next_id from the previous call, to read only newer lines",
+            "title": "Next Id"
+          },
+          "node": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Node name from the config; the first node when absent",
+            "title": "Node"
+          },
+          "source": {
+            "default": "ftl",
+            "description": "ftl warnings, the dnsmasq per-query log or the webserver log",
+            "enum": [
+              "ftl",
+              "dnsmasq",
+              "webserver"
+            ],
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "title": "pihole_logsArguments",
+        "type": "object"
+      },
+      "name": "pihole_logs",
+      "outputSchema": {
+        "properties": {
+          "lines": {
+            "title": "Lines"
+          },
+          "next_id": {
+            "title": "Next Id"
+          },
+          "node": {
+            "title": "Node",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "node",
+          "source",
+          "next_id",
+          "lines",
+          "truncated"
+        ],
+        "title": "Logs",
+        "type": "object"
+      },
+      "title": "Pi-hole logs"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Pi-hole settings of one node. By default only the keys that differ from Pi-hole's defaults, with whether each is pinned by an FTLCONF_ variable. prefix narrows to a section (e.g. dns, webserver.api).",
+      "inputSchema": {
+        "properties": {
+          "modified_only": {
+            "default": true,
+            "description": "Only settings that differ from Pi-hole's defaults",
+            "title": "Modified Only",
+            "type": "boolean"
+          },
+          "node": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Node name from the config; the first node when absent",
+            "title": "Node"
+          },
+          "prefix": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Only keys in this section, e.g. dns or webserver.api",
+            "title": "Prefix"
+          }
+        },
+        "title": "pihole_configArguments",
+        "type": "object"
+      },
+      "name": "pihole_config",
+      "outputSchema": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "node": {
+            "title": "Node",
+            "type": "string"
+          },
+          "settings": {
+            "additionalProperties": true,
+            "title": "Settings",
+            "type": "object"
+          }
+        },
+        "required": [
+          "node",
+          "count",
+          "settings"
+        ],
+        "title": "Settings",
+        "type": "object"
+      },
+      "title": "Pi-hole settings"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Settings that differ between the Pi-hole nodes (webserver.domain, which is per node by design, is ignored). Empty differences means the pair is consistent.",
+      "inputSchema": {
+        "properties": {},
+        "title": "pihole_config_diffArguments",
+        "type": "object"
+      },
+      "name": "pihole_config_diff",
+      "outputSchema": {
+        "properties": {
+          "differences": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Differences",
+            "type": "array"
+          },
+          "nodes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Nodes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "nodes",
+          "differences"
+        ],
+        "title": "SettingsDiff",
+        "type": "object"
+      },
+      "title": "Pi-hole settings drift"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Komodo servers (Periphery agents) with connection state and version.",
+      "inputSchema": {
+        "properties": {},
+        "title": "komodo_serversArguments",
+        "type": "object"
+      },
+      "name": "komodo_servers",
+      "outputSchema": {
+        "properties": {
+          "servers": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Servers",
+            "type": "array"
+          }
+        },
+        "required": [
+          "servers"
+        ],
+        "title": "Servers",
+        "type": "object"
+      },
+      "title": "Komodo servers"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Komodo stacks: state, server, deployed commit vs repo HEAD (head_differs is informational: unrelated commits move HEAD without a redeploy), services with image updates available.",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "default": 200,
+            "description": "Rows to return, 1-1000",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "only_problems": {
+            "default": false,
+            "description": "Only stacks not running or whose project is missing",
+            "title": "Only Problems",
+            "type": "boolean"
+          }
+        },
+        "title": "komodo_stacksArguments",
+        "type": "object"
+      },
+      "name": "komodo_stacks",
+      "outputSchema": {
+        "description": "At most ``limit`` items, how many there were, and whether some were cut.",
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {},
+            "title": "Items",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "Listing",
+        "type": "object"
+      },
+      "title": "Komodo stacks"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "One Komodo stack: deploy info, commit messages, missing files, remote errors and per-service container state.",
+      "inputSchema": {
+        "properties": {
+          "stack": {
+            "description": "Stack name",
+            "title": "Stack",
+            "type": "string"
+          }
+        },
+        "required": [
+          "stack"
+        ],
+        "title": "komodo_stackArguments",
+        "type": "object"
+      },
+      "name": "komodo_stack",
+      "outputSchema": {
+        "properties": {
+          "config": {
+            "title": "Config"
+          },
+          "info": {
+            "title": "Info"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "services": {
+            "title": "Services"
+          }
+        },
+        "required": [
+          "name",
+          "config",
+          "info",
+          "services"
+        ],
+        "title": "Stack",
+        "type": "object"
+      },
+      "title": "Komodo stack"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Recent Komodo updates (deploys, syncs, procedure runs), newest first.",
+      "inputSchema": {
+        "properties": {
+          "failed_only": {
+            "default": false,
+            "description": "Only updates that failed",
+            "title": "Failed Only",
+            "type": "boolean"
+          },
+          "limit": {
+            "default": 30,
+            "description": "Rows to return, 1-1000",
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "title": "komodo_updatesArguments",
+        "type": "object"
+      },
+      "name": "komodo_updates",
+      "outputSchema": {
+        "description": "At most ``limit`` items, how many there were, and whether some were cut.",
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {},
+            "title": "Items",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "Listing",
+        "type": "object"
+      },
+      "title": "Komodo updates"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Komodo ResourceSync state: last sync, pending resource changes and pending deploys that a sync would execute. Reports only, never runs the sync.",
+      "inputSchema": {
+        "properties": {},
+        "title": "komodo_sync_statusArguments",
+        "type": "object"
+      },
+      "name": "komodo_sync_status",
+      "outputSchema": {
+        "properties": {
+          "syncs": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Syncs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "syncs"
+        ],
+        "title": "SyncStatus",
+        "type": "object"
+      },
+      "title": "Komodo sync status"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Recent Semaphore task runs (newest first) with template, status, who ran it and commit. failed_only keeps error/failed/stopped runs.",
+      "inputSchema": {
+        "properties": {
+          "failed_only": {
+            "default": false,
+            "description": "Only error, failed or stopped runs",
+            "title": "Failed Only",
+            "type": "boolean"
+          },
+          "limit": {
+            "default": 20,
+            "description": "Rows to return, 1-1000",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "project": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Project name; every project when absent",
+            "title": "Project"
+          },
+          "template": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Template name, exact",
+            "title": "Template"
+          }
+        },
+        "title": "semaphore_tasksArguments",
+        "type": "object"
+      },
+      "name": "semaphore_tasks",
+      "outputSchema": {
+        "description": "At most ``limit`` items, how many there were, and whether some were cut.",
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {},
+            "title": "Items",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "Listing",
+        "type": "object"
+      },
+      "title": "Semaphore task runs"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Output of one Semaphore task (last `tail` lines, secrets redacted).",
+      "inputSchema": {
+        "properties": {
+          "project": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Project name; every project is tried when absent",
+            "title": "Project"
+          },
+          "tail": {
+            "default": 200,
+            "description": "Last lines to return, 1-2000",
+            "title": "Tail",
+            "type": "integer"
+          },
+          "task_id": {
+            "description": "Task id from semaphore_tasks",
+            "title": "Task Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "task_id"
+        ],
+        "title": "semaphore_task_outputArguments",
+        "type": "object"
+      },
+      "name": "semaphore_task_output",
+      "outputSchema": {
+        "properties": {
+          "lines_total": {
+            "title": "Lines Total",
+            "type": "integer"
+          },
+          "output": {
+            "title": "Output",
+            "type": "string"
+          },
+          "project": {
+            "title": "Project"
+          },
+          "task_id": {
+            "title": "Task Id",
+            "type": "integer"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "project",
+          "task_id",
+          "lines_total",
+          "truncated",
+          "output"
+        ],
+        "title": "TaskOutput",
+        "type": "object"
+      },
+      "title": "Semaphore task output"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Traefik HTTP routers: rule (the hosts and paths a route matches), entry points (lan, public), middlewares (the SSO gate shows here), backing service, TLS and status. search matches rule, name and service, e.g. a hostname.",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "default": 200,
+            "description": "Rows to return, 1-1000",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Provider name, exactly as the router list shows it",
+            "title": "Provider"
+          },
+          "search": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Substring of the rule, name or service, e.g. a hostname",
+            "title": "Search"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "enabled",
+                  "disabled",
+                  "warning"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Router status",
+            "title": "Status"
+          }
+        },
+        "title": "traefik_routersArguments",
+        "type": "object"
+      },
+      "name": "traefik_routers",
+      "outputSchema": {
+        "description": "At most ``limit`` items, how many there were, and whether some were cut.",
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {},
+            "title": "Items",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "Listing",
+        "type": "object"
+      },
+      "title": "Traefik routers"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Traefik HTTP services: backend servers with their health (serverStatus UP/DOWN), the Kubernetes service behind them and the routers using them. down_only keeps services with a server that is not UP.",
+      "inputSchema": {
+        "properties": {
+          "down_only": {
+            "default": false,
+            "description": "Only services with a server that is not UP",
+            "title": "Down Only",
+            "type": "boolean"
+          },
+          "limit": {
+            "default": 200,
+            "description": "Rows to return, 1-1000",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "search": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Substring of the service name or of a router using it",
+            "title": "Search"
+          }
+        },
+        "title": "traefik_servicesArguments",
+        "type": "object"
+      },
+      "name": "traefik_services",
+      "outputSchema": {
+        "description": "At most ``limit`` items, how many there were, and whether some were cut.",
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {},
+            "title": "Items",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "Listing",
+        "type": "object"
+      },
+      "title": "Traefik services"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Alerts firing in Alertmanager now, with severity, namespace, summary and runbook. Watchdog and InfoInhibitor always fire by design. include_silenced also lists silenced and inhibited alerts.",
+      "inputSchema": {
+        "properties": {
+          "include_silenced": {
+            "default": false,
+            "description": "Also list silenced and inhibited alerts",
+            "title": "Include Silenced",
+            "type": "boolean"
+          },
+          "limit": {
+            "default": 100,
+            "description": "Rows to return, 1-1000",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "namespace": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Kubernetes namespace label",
+            "title": "Namespace"
+          },
+          "severity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Severity label, e.g. critical or warning",
+            "title": "Severity"
+          }
+        },
+        "title": "alertmanager_alertsArguments",
+        "type": "object"
+      },
+      "name": "alertmanager_alerts",
+      "outputSchema": {
+        "description": "At most ``limit`` items, how many there were, and whether some were cut.",
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {},
+            "title": "Items",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "Listing",
+        "type": "object"
+      },
+      "title": "Firing alerts"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Alertmanager silences (active by default): matchers, author, comment, end time.",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "default": 50,
+            "description": "Rows to return, 1-1000",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "state": {
+            "default": "active",
+            "description": "Silence state",
+            "enum": [
+              "active",
+              "pending",
+              "expired"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "title": "alertmanager_silencesArguments",
+        "type": "object"
+      },
+      "name": "alertmanager_silences",
+      "outputSchema": {
+        "description": "At most ``limit`` items, how many there were, and whether some were cut.",
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {},
+            "title": "Items",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "Listing",
+        "type": "object"
+      },
+      "title": "Alertmanager silences"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Recent ntfy notifications (newest first) with time, topic, priority, title, message and tags. Only the topics alerts, backups, ci and deploys are readable; the server keeps messages for 12 h, so nothing older comes back.",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "default": 30,
+            "description": "Rows to return, 1-1000",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "min_priority": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Lowest priority to keep, 1 (min) to 5 (urgent)",
+            "title": "Min Priority"
+          },
+          "since": {
+            "default": "12h",
+            "description": "Duration (30m, 12h), Unix time, message id or all; at most 12 h",
+            "title": "Since",
+            "type": "string"
+          },
+          "topic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "alerts, backups, ci or deploys; all four when absent",
+            "title": "Topic"
+          }
+        },
+        "title": "ntfy_messagesArguments",
+        "type": "object"
+      },
+      "name": "ntfy_messages",
+      "outputSchema": {
+        "description": "At most ``limit`` items, how many there were, and whether some were cut.",
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {},
+            "title": "Items",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "Listing",
+        "type": "object"
+      },
+      "title": "ntfy messages"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Secret paths in HashiCorp Vault's KV store under a prefix (default k8s/, the External Secrets Operator's area), with current version, last update and whether that version is deleted or destroyed. Metadata only: never a secret value.",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "default": 200,
+            "description": "Rows to return, 1-1000",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "prefix": {
+            "default": "k8s/",
+            "description": "KV path prefix, e.g. k8s/",
+            "title": "Prefix",
+            "type": "string"
+          }
+        },
+        "title": "vault_kv_pathsArguments",
+        "type": "object"
+      },
+      "name": "vault_kv_paths",
+      "outputSchema": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "mount": {
+            "title": "Mount",
+            "type": "string"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "mount",
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "KvPaths",
+        "type": "object"
+      },
+      "title": "Vault KV paths"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Jobs of one GitLab pipeline: id, name, stage, status, duration, failure reason. project is `homelab/<repo>` or just `<repo>`.",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "default": 100,
+            "description": "Rows to return, 1-1000",
+            "title": "Limit",
+            "type": "integer"
+          },
+          "pipeline_id": {
+            "description": "Pipeline id",
+            "title": "Pipeline Id",
+            "type": "integer"
+          },
+          "project": {
+            "description": "`homelab/<repo>` or just `<repo>`",
+            "title": "Project",
+            "type": "string"
+          }
+        },
+        "required": [
+          "project",
+          "pipeline_id"
+        ],
+        "title": "gitlab_pipeline_jobsArguments",
+        "type": "object"
+      },
+      "name": "gitlab_pipeline_jobs",
+      "outputSchema": {
+        "description": "At most ``limit`` items, how many there were, and whether some were cut.",
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {},
+            "title": "Items",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "Listing",
+        "type": "object"
+      },
+      "title": "GitLab pipeline jobs"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Log of one GitLab CI job, colour codes and section markers removed, secrets redacted. grep keeps matching lines (case-insensitive regex); tail keeps the last N lines (max 2000).",
+      "inputSchema": {
+        "properties": {
+          "grep": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Regular expression; keep matching lines only",
+            "title": "Grep"
+          },
+          "job_id": {
+            "description": "Job id",
+            "title": "Job Id",
+            "type": "integer"
+          },
+          "project": {
+            "description": "`homelab/<repo>` or just `<repo>`",
+            "title": "Project",
+            "type": "string"
+          },
+          "tail": {
+            "default": 200,
+            "description": "Last lines to return, 1-2000",
+            "title": "Tail",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "project",
+          "job_id"
+        ],
+        "title": "gitlab_job_logArguments",
+        "type": "object"
+      },
+      "name": "gitlab_job_log",
+      "outputSchema": {
+        "properties": {
+          "job_id": {
+            "title": "Job Id",
+            "type": "integer"
+          },
+          "lines_matched": {
+            "title": "Lines Matched",
+            "type": "integer"
+          },
+          "lines_total": {
+            "title": "Lines Total",
+            "type": "integer"
+          },
+          "output": {
+            "title": "Output",
+            "type": "string"
+          },
+          "project": {
+            "title": "Project",
+            "type": "string"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "project",
+          "job_id",
+          "lines_total",
+          "lines_matched",
+          "truncated",
+          "output"
+        ],
+        "title": "JobLog",
+        "type": "object"
+      },
+      "title": "GitLab job log"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Drift report across the homelab. Default scopes: argocd (apps not Synced+Healthy), externalsecrets (ExternalSecrets or ClusterSecretStores not Ready), vault (Vault paths ExternalSecrets read that are missing or deleted, and unreferenced ones), komodo (stacks down or missing files, pending ResourceSync), dns (technitium and pihole doctors in proxmox-infra; technitium needs a vault login), semaphore and pbs (their doctors). Opt-in: inventory (inventory-doctor) and terraform (lxc/talos/backup/vault drift-detect + unifi plan; slow, needs a vault login). Each check reports clean|drift|error|skipped. Reports only: fixes go through the repo skills.",
+      "inputSchema": {
+        "properties": {
+          "include_terraform": {
+            "default": false,
+            "description": "Also run the slow Terraform plans",
+            "title": "Include Terraform",
+            "type": "boolean"
+          },
+          "scopes": {
+            "anyOf": [
+              {
+                "items": {
+                  "enum": [
+                    "argocd",
+                    "externalsecrets",
+                    "vault",
+                    "komodo",
+                    "dns",
+                    "semaphore",
+                    "pbs",
+                    "inventory",
+                    "terraform"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Scopes to check; the default set when absent",
+            "title": "Scopes"
+          }
+        },
+        "title": "homelab_drift_reportArguments",
+        "type": "object"
+      },
+      "name": "homelab_drift_report",
+      "outputSchema": {
+        "properties": {
+          "checks": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Checks",
+            "type": "array"
+          },
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Counts",
+            "type": "object"
+          },
+          "overall": {
+            "title": "Overall",
+            "type": "string"
+          }
+        },
+        "required": [
+          "overall",
+          "counts",
+          "checks"
+        ],
+        "title": "DriftReport",
+        "type": "object"
+      },
+      "title": "Drift report"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Render an argo-apps app twice with `kustomize build --enable-helm` and diff the output. Any difference is non-determinism that ArgoCD will show as permanent drift.",
+      "inputSchema": {
+        "properties": {
+          "app_name": {
+            "description": "argo-apps app directory name, e.g. searxng",
+            "title": "App Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "app_name"
+        ],
+        "title": "homelab_drift_render_checkArguments",
+        "type": "object"
+      },
+      "name": "homelab_drift_render_check",
+      "outputSchema": {
+        "properties": {
+          "app": {
+            "title": "App",
+            "type": "string"
+          },
+          "details": {
+            "title": "Details"
+          },
+          "diff": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Diff"
+          },
+          "lines": {
+            "title": "Lines",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "app",
+          "status"
+        ],
+        "title": "RenderCheck",
+        "type": "object"
+      },
+      "title": "Render determinism check"
+    }
+  ]
+}

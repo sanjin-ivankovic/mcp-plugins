@@ -1,0 +1,17 @@
+# Auto detect text files and perform LF normalization
+* text=auto eol=lf
+
+# Explicit text files
+*.md text eol=lf diff=markdown
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
+*.sh text eol=lf diff=bash
+*.py text eol=lf diff=python
+
+# Binary files
+*.png binary
+*.jpg binary
+*.ico binary
+*.tgz binary

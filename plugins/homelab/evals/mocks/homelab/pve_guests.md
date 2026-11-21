@@ -1,0 +1,1 @@
+{"count": 2, "truncated": false, "items": [{"vmid": 140, "name": "scratch-db", "type": "lxc", "node": "pve-a", "status": "running", "tags": ["db"]}, {"vmid": 141, "name": "scratch-web", "type": "lxc", "node": "pve-b", "status": "running", "tags": ["web"]}]}

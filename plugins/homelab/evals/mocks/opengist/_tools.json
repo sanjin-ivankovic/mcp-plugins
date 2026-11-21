@@ -1,0 +1,277 @@
+{
+  "tools": [
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true,
+        "readOnlyHint": false
+      },
+      "description": "Create a gist on the homelab OpenGist and return its page URL and one raw URL per file. files maps filename to content (the extension picks the syntax highlighting). visibility defaults to unlisted, expire to 7days.",
+      "inputSchema": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "One-line description",
+            "title": "Description"
+          },
+          "expire": {
+            "default": "7days",
+            "description": "How long the gist lives",
+            "enum": [
+              "never",
+              "1hour",
+              "12hours",
+              "1day",
+              "7days",
+              "15days"
+            ],
+            "title": "Expire",
+            "type": "string"
+          },
+          "files": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Filename to content; the extension picks the highlighting",
+            "title": "Files",
+            "type": "object"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Gist title",
+            "title": "Title"
+          },
+          "visibility": {
+            "default": "unlisted",
+            "description": "unlisted (link only), private or public",
+            "enum": [
+              "public",
+              "unlisted",
+              "private"
+            ],
+            "title": "Visibility",
+            "type": "string"
+          }
+        },
+        "required": [
+          "files"
+        ],
+        "title": "opengist_create_gistArguments",
+        "type": "object"
+      },
+      "name": "opengist_create_gist",
+      "outputSchema": {
+        "description": "A gist; backend fields appear only when the gist has them.",
+        "properties": {
+          "description": {
+            "title": "Description"
+          },
+          "expires_at": {
+            "title": "Expires At"
+          },
+          "files": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Files",
+            "type": "object"
+          },
+          "html_url": {
+            "title": "Html Url"
+          },
+          "id": {
+            "title": "Id"
+          },
+          "raw_urls": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Raw Urls",
+            "type": "object"
+          },
+          "title": {
+            "title": "Title"
+          },
+          "updated_at": {
+            "title": "Updated At"
+          },
+          "visibility": {
+            "title": "Visibility"
+          }
+        },
+        "required": [
+          "updated_at",
+          "raw_urls"
+        ],
+        "title": "Gist",
+        "type": "object"
+      },
+      "title": "Create gist"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "One gist with its files and contents, by id (the 32-hex id in its URL).",
+      "inputSchema": {
+        "properties": {
+          "id": {
+            "description": "The 32-hex gist id from its URL",
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "opengist_get_gistArguments",
+        "type": "object"
+      },
+      "name": "opengist_get_gist",
+      "outputSchema": {
+        "description": "A gist; backend fields appear only when the gist has them.",
+        "properties": {
+          "description": {
+            "title": "Description"
+          },
+          "expires_at": {
+            "title": "Expires At"
+          },
+          "files": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Files",
+            "type": "object"
+          },
+          "html_url": {
+            "title": "Html Url"
+          },
+          "id": {
+            "title": "Id"
+          },
+          "raw_urls": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Raw Urls",
+            "type": "object"
+          },
+          "title": {
+            "title": "Title"
+          },
+          "updated_at": {
+            "title": "Updated At"
+          },
+          "visibility": {
+            "title": "Visibility"
+          }
+        },
+        "required": [
+          "updated_at",
+          "raw_urls"
+        ],
+        "title": "Gist",
+        "type": "object"
+      },
+      "title": "Get gist"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "The user's own gists (public, unlisted and private), newest first.",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "default": 20,
+            "description": "Gists to return, 1-100",
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "title": "opengist_list_gistsArguments",
+        "type": "object"
+      },
+      "name": "opengist_list_gists",
+      "outputSchema": {
+        "$defs": {
+          "GistRow": {
+            "properties": {
+              "expires_at": {
+                "title": "Expires At"
+              },
+              "html_url": {
+                "title": "Html Url"
+              },
+              "id": {
+                "title": "Id"
+              },
+              "title": {
+                "title": "Title"
+              },
+              "updated_at": {
+                "title": "Updated At"
+              },
+              "visibility": {
+                "title": "Visibility"
+              }
+            },
+            "title": "GistRow",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/$defs/GistRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "GistList",
+        "type": "object"
+      },
+      "title": "List my gists"
+    }
+  ]
+}

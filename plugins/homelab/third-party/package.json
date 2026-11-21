@@ -1,0 +1,10 @@
+{
+  "name": "homelab-third-party-mcp",
+  "private": true,
+  "description": "Third-party MCP servers the homelab plugin starts; installed with npm ci from package-lock.json by scripts/run-node-server.sh",
+  "dependencies": {
+    "argocd-mcp": "0.9.0",
+    "kubernetes-mcp-server": "0.1.3",
+    "longhorn-mcp": "0.1.8"
+  }
+}
