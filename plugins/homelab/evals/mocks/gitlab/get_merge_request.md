@@ -1,0 +1,1 @@
+{"iid": 40, "title": "chore(deps): update ruff", "state": "opened", "source_branch": "renovate/ruff", "target_branch": "main", "detailed_merge_status": "mergeable", "web_url": "https://git.test/example-org/mcp-plugins/-/merge_requests/40"}

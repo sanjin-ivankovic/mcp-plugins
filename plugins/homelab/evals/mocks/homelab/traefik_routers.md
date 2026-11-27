@@ -1,0 +1,1 @@
+{"count": 1, "truncated": false, "items": [{"name": "app-lan@kubernetescrd", "rule": "Host(`app.test`)", "entryPoints": ["lan"], "service": "app-svc@kubernetescrd", "status": "enabled", "tls": true}]}

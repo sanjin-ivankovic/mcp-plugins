@@ -1,0 +1,106 @@
+# Copy to ~/.config/homelab-mcp/config.toml (mode 600).
+# Secrets are never inline: use <name>_file (path; relative to this file's
+# directory) or <name>_command (argv list, no shell; stdout is the value).
+# A missing section only disables that system's tools.
+
+[repos]  # local checkouts used by homelab_drift_report / homelab_drift_render_check
+argo_apps = "~/Projects/homelab/argo-apps"
+proxmox_infra = "~/Projects/homelab/proxmox-infra"
+
+# --- Hypervisor, backup and storage hosts ---
+
+[pve]  # user mcp@pve, role PVEAuditor on /
+url = "https://pve.example.com:8006"
+token_id = "mcp@pve!readonly"
+token_secret_file = "secrets/pve"
+verify_tls = false
+
+[pbs]  # user mcp@pbs, role Audit on / for the user and the token
+url = "https://pbs.example.com:8007"
+token_id = "mcp@pbs!readonly"
+token_secret_file = "secrets/pbs"
+verify_tls = false
+
+[unraid]  # API key with role VIEWER
+url = "http://10.130.0.30/graphql"
+api_key_file = "secrets/unraid"
+
+# --- DNS ---
+
+[technitium]  # talk to the nodes directly, not through Traefik
+token_file = "secrets/technitium"
+nodes = [
+  { name = "ns1", url = "http://10.110.0.10:5380", dhcp = true },
+  { name = "ns2", url = "http://10.110.0.11:5380" },
+]
+
+[pihole]  # app password; file holds "<node> <password>" lines
+nodes = [
+  { name = "pihole-1", url = "http://10.110.0.12", credentials_file = "secrets/pihole" },
+  { name = "pihole-2", url = "http://10.110.0.13", credentials_file = "secrets/pihole" },
+]
+
+# --- LXC services: deploys and playbook runs ---
+
+[komodo]  # API key of local user mcp (base permission Read)
+url = "http://10.140.0.14:9120"
+key_file = "secrets/komodo-key"
+secret_file = "secrets/komodo-secret"
+
+[semaphore]  # user mcp, project role Guest; host directly (ingress needs OIDC)
+url = "http://10.140.0.15:3000"
+token_file = "secrets/semaphore"
+
+# --- Kubernetes cluster ---
+
+[argocd]  # account mcp, role:readonly (same token as the argocd MCP server)
+url = "https://argo.example.com"
+token_file = "secrets/argocd"
+
+[kubernetes]  # mcp-reader kubeconfig; used by drift's externalsecrets scope
+kubeconfig = "kubeconfig-readonly"
+
+[vault]  # AppRole mcp-reader, policy mcp-reader: list/read kv/metadata/* only, never values
+url = "https://vault.example.com:8200"
+role_id = "<terragrunt output -raw mcp_reader_role_id in proxmox-infra terraform/vault>"
+secret_id_file = "secrets/vault-secret-id"
+# eso_prefix = "k8s/"  # the drift scope vault compares ExternalSecrets with this prefix
+
+[traefik]  # no credential: the API route is on the lan entrypoint only
+url = "https://traefik.example.com"
+
+[alertmanager]  # no credential: lan entrypoint only; silences are read, never written
+url = "https://alertmanager.example.com"
+
+[ntfy]  # user mcp, read-only on topics alerts, backups, ci, deploys
+url = "https://ntfy.example.com"
+token_file = "secrets/ntfy"
+
+# --- GitLab ---
+
+[gitlab]  # group access token mcp, role Reporter, scope read_api (job logs, pipeline jobs)
+url = "https://source.example.com"
+token_file = "secrets/gitlab"
+
+# --- Web search ---
+
+[searxng]  # searxng server: no credential, lan only; the chart must list json in search.formats
+url = "https://search.example.com"
+# language = "en"              # default language for searxng_search
+# fetch_max_bytes = 5242880    # searxng_fetch download cap (5 MiB)
+
+# --- Servers that write as you (keep their write tools on "ask") ---
+
+[opengist]  # opengist server: access token, gist read/write, no user scope
+url = "https://gist.example.com"
+token_file = "secrets/opengist"
+
+[silverbullet]  # silverbullet server: API token of a non-admin account, write role on one space
+url = "https://silverbullet.example.com/notes"  # the space URL, path included
+token_file = "secrets/silverbullet"
+
+[docmost]  # docmost server: Docmost member without MFA, Writer in the space
+url = "https://docmost.example.com"
+email = "claude@example.com"
+password_file = "secrets/docmost"
+# space = "handbook"  # slug used when a tool gets no space

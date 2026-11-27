@@ -1,0 +1,193 @@
+---
+# CI for mcp-plugins: secret scan, lint (shared components), Python tests and
+# a manifest check. No image build and no deploy: the plugin is installed
+# from this repo by `claude plugin marketplace add`. The GitHub mirror runs
+# on the "GitHub Mirror" schedule (SCHEDULE_TYPE=mirror) like every other
+# mirrored repo.
+default:
+  tags:
+    - docker
+  interruptible: true
+
+workflow:
+  auto_cancel:
+    on_new_commit: interruptible
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+    - when: never
+
+stages:
+  - scan
+  - lint
+  - test
+  - release
+  - mirror
+
+variables:
+  # Digest-pinned: a new ci-base arrives as a Renovate MR that runs this
+  # pipeline on it first (shared ci-variables preset).
+  # renovate: datasource=docker depName=registry.example.com/homelab/ci-components/ci versioning=docker
+  CI_IMAGE: $HARBOR_HOST/homelab/ci-components/ci:latest@sha256:63faa75c66c787d4bf09249cf009c28a15f9bf1d1d6386352cfa68ae45989053
+
+include:
+  - component: $CI_SERVER_FQDN/homelab/ci-components/scan-secrets@5.0.0
+  - component: $CI_SERVER_FQDN/homelab/ci-components/lint-commits@5.0.0
+  # The repo against ci-components docs/REPO-STANDARD.md; exceptions in
+  # .ci/repo-standard.yaml.
+  - component: $CI_SERVER_FQDN/homelab/ci-components/lint-repo-standard@5.0.0
+  - component: $CI_SERVER_FQDN/homelab/ci-components/lint-markdown@5.0.0
+  - component: $CI_SERVER_FQDN/homelab/ci-components/lint-shell@5.0.0
+  - component: $CI_SERVER_FQDN/homelab/ci-components/lint-yaml@5.0.0
+  # Failure alert for main pipelines (ntfy topic ci).
+  - component: $CI_SERVER_FQDN/homelab/ci-components/notify-ntfy@5.0.0
+  # Sanitized GitHub portfolio mirror (ci-base carries the /opt/ci tooling).
+  - component: $CI_SERVER_FQDN/homelab/ci-components/mirror-github@5.0.0
+    inputs:
+      vault: true
+      repo_name: mcp-plugins
+
+# The repo's own jobs run on MRs and main pushes only, each when its files
+# change; a schedule pipeline carries just the mirror.
+
+# Versions and pins across the manifests, pyproject, __init__.py, uv.lock and
+# the kubernetes wrapper; tool names in the consumer skills against
+# docs/TOOLS.md and .ci/third_party_tools.txt.
+lint:manifests:
+  stage: lint
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - changes:
+        - .claude-plugin/**/*
+        - plugins/*/.claude-plugin/**/*
+        - plugins/homelab/server/pyproject.toml
+        - plugins/homelab/server/uv.lock
+        - plugins/homelab/server/src/homelab_mcp/__init__.py
+        - plugins/homelab/scripts/*.sh
+        - plugins/homelab/third-party/*
+        - plugins/homelab/skills/**/*
+        - docs/TOOLS.md
+        - scripts/bump_version.py
+        - .ci/*
+  image: $CI_IMAGE
+  script:
+    - python3 .ci/check_manifests.py
+    - python3 .ci/check_skill_tools.py
+    - python3 .ci/check_skills.py
+
+# Claude Code's own manifest validation; --strict fails on warnings too.
+# The npm pin follows Renovate's 14-day soak like the MCP server pins.
+lint:plugin:
+  stage: lint
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - changes:
+        - .claude-plugin/**/*
+        - plugins/**/*
+        - .gitlab-ci.yml
+  image: node:26-slim@sha256:e6bedef217677b276c591795e169840edd9096dbf13f29df8ef8d1856b8820bc
+  variables:
+    CLAUDE_CODE_VERSION: "2.1.329"
+  script:
+    - npx -y "@anthropic-ai/claude-code@$CLAUDE_CODE_VERSION" plugin validate --strict .
+
+test:python:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    # TOOLS.md is generated and checked by a test, as is scripts/changelog.py;
+    # this file pins the uv and python image versions the job runs on.
+    - changes:
+        - plugins/homelab/server/**/*
+        - docs/TOOLS.md
+        - scripts/changelog.py
+        - .gitlab-ci.yml
+  stage: test
+  # Astral's uv image: uv comes from ghcr.io, not from a pip install off PyPI.
+  # Its -python3.15 suffix must match plugins/homelab/server/.python-version.
+  image: ghcr.io/astral-sh/uv:0.13.10-python3.15-trixie-slim@sha256:3ee10471b12b57f6f86d03f68c44fbd4bb8d5540efa25ab3b89159e1216b1a70
+  variables:
+    UV_CACHE_DIR: $CI_PROJECT_DIR/.uv-cache
+    UV_PYTHON_DOWNLOADS: never
+    # The build directory is its own mount; hard links into it fail.
+    UV_LINK_MODE: copy
+  # The job takes under two minutes; a stalled PyPI download fails it here
+  # instead of at the project's one-hour limit.
+  timeout: 10m
+  # uv's GitLab guide: key on uv.lock, keep only wheels built from source
+  # (uv cache prune --ci in after_script).
+  cache:
+    key:
+      files: [plugins/homelab/server/uv.lock]
+    paths: [.uv-cache]
+  before_script:
+    - cd plugins/homelab/server
+    # --locked also fails when uv.lock no longer matches pyproject.toml.
+    - uv sync --locked
+  script:
+    - uv run --locked ruff check src tests
+    - uv run --locked ruff format --check src tests
+    - uv run --locked pyright
+    - uv run --locked pytest --cov --cov-report=term --cov-report=xml:coverage.xml
+  coverage: '/^TOTAL.*\s(\d+)%$/'
+  artifacts:
+    when: always
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: plugins/homelab/server/coverage.xml
+  after_script:
+    - uv cache prune --ci
+
+# Known vulnerabilities in the locked runtime dependencies (uv.lock and the npm
+# servers' package-lock.json), with the trivy the
+# CI image bakes. It also runs on the scheduled pipeline, so a new advisory
+# against an unchanged lock still surfaces.
+audit:deps:
+  stage: scan
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - changes:
+        - plugins/homelab/server/uv.lock
+        - plugins/homelab/third-party/package-lock.json
+        - .gitlab-ci.yml
+  image: $CI_IMAGE
+  variables:
+    TRIVY_CACHE_DIR: $CI_PROJECT_DIR/.trivycache
+  cache:
+    key: trivy-db
+    paths: [.trivycache]
+  script:
+    - trivy fs --quiet --scanners vuln --exit-code 1 --ignore-unfixed --skip-dirs plugins/homelab/server/.venv plugins/homelab
+
+# Publish the version in plugin.json as GitLab release vX.Y.Z (GitLab creates
+# the tag at the commit that set that version) with its CHANGELOG.md section.
+# Runs on every main push and does nothing when that version is already
+# released; CI_JOB_TOKEN may create releases, so no extra secret. Full
+# history: the release commit can be older than the shallow clone.
+release:
+  stage: release
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+  image: $CI_IMAGE
+  interruptible: false
+  variables:
+    GIT_DEPTH: "0"
+  script:
+    - python3 .ci/release.py release
+
+# A merged change to what installed copies run reaches no one until the
+# version moves. Fails (and notify-ntfy alerts) when one has waited on main
+# more than a week without a release.
+release:pending:
+  stage: release
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+  image: $CI_IMAGE
+  variables:
+    GIT_DEPTH: "0"
+  script:
+    - python3 .ci/release.py pending

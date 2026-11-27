@@ -1,0 +1,1 @@
+{"count": 1, "truncated": false, "items": [{"alertname": "BackupStale", "severity": "warning", "namespace": "", "summary": "scratch-db has no backup newer than 36h", "runbook": "https://docmost.test/s/handbook/p/backups"}]}

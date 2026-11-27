@@ -1,0 +1,1 @@
+{"id": "0123456789abcdef0123456789abcdef", "visibility": "unlisted", "html_url": "https://gist.test/claude/0123456789abcdef0123456789abcdef", "updated_at": "2026-11-18T12:00:00Z", "raw_urls": {"snippet.sh": "https://gist.test/claude/0123456789abcdef0123456789abcdef/raw/HEAD/snippet.sh"}}

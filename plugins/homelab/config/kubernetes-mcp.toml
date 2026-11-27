@@ -1,0 +1,19 @@
+# kubernetes-mcp-server settings. The server takes no runtime CLI flags and
+# rejects unknown keys, so a renamed key fails the start instead of being
+# ignored. run-kubernetes-mcp.sh adds the per-user kubeconfig as a drop-in.
+read_only = true
+toolsets = ["core"]
+cluster_provider_strategy = "disabled"
+
+# nodes_log and nodes_stats_summary need `get nodes/proxy`, which mcp-reader
+# does not have: that verb reaches the kubelet's exec and attach endpoints, so
+# granting it would make the read-only account a shell. projects_list is
+# OpenShift-only. All three can only ever fail here, so they are not offered.
+disabled_tools = ["nodes_log", "nodes_stats_summary", "projects_list"]
+
+# RBAC already denies Secrets to mcp-reader; this keeps the tools from even
+# asking, so a mis-bound kubeconfig still does not return Secret data.
+[[denied_resources]]
+group = ""
+version = "v1"
+kind = "Secret"

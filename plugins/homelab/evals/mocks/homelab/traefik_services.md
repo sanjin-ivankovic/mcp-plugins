@@ -1,0 +1,1 @@
+{"count": 1, "truncated": false, "items": [{"name": "app-svc@kubernetescrd", "status": "enabled", "servers": {"http://10.42.1.17:8080": "DOWN"}, "kubernetes": {"namespace": "app", "service": "app"}, "usedBy": ["app-lan@kubernetescrd"]}]}

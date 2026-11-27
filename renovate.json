@@ -1,0 +1,62 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Renovate configuration for mcp-plugins (Python server, pinned MCP servers, CI)",
+  "dependencyDashboard": {
+    "title": "Renovate Dashboard: mcp-plugins"
+  },
+  "extends": [
+    "local>homelab/renovate",
+    "local>homelab/renovate:ci-components",
+    "local>homelab/renovate:ci-variables",
+    "local>homelab/renovate:lane-fast(.pre-commit-config.yaml)"
+  ],
+  "enabledManagers": ["pep621", "pyenv", "gitlabci", "pre-commit", "npm", "custom.regex"],
+  "npm": {
+    "description": "The third-party MCP servers: exact versions in package.json, the whole tree in package-lock.json",
+    "managerFilePatterns": ["/^plugins/homelab/third-party/package\\.json$/"]
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Claude Code version the CI lint:plugin job validates the manifests with",
+      "managerFilePatterns": ["/^\\.gitlab-ci\\.yml$/"],
+      "matchStrings": ["CLAUDE_CODE_VERSION: \"(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "@anthropic-ai/claude-code",
+      "datasourceTemplate": "npm"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Everything the plugin locks soaks 14 days. For Python this matches [tool.uv] exclude-newer = \"14 days\", which also holds back transitive packages in lock-file maintenance; a direct pin newer than that would not resolve. npm has no such window: its transitive packages get only the audit:deps scan.",
+      "matchManagers": ["pep621", "npm"],
+      "minimumReleaseAge": "14 days"
+    },
+    {
+      "description": "Claude Code (CI lint:plugin, a customManager in .gitlab-ci.yml) soaks like the plugin's own dependencies; the MCP servers and mcp are already covered by the pep621/npm rule above. It releases several times a week, so it comes on the Monday run only.",
+      "matchDepNames": ["@anthropic-ai/claude-code"],
+      "minimumReleaseAge": "14 days",
+      "schedule": ["* 0-6 * * 1"]
+    },
+    {
+      "description": "Patch and minor updates of what the plugin locks automerge after the 14-day soak: test:python and lint:plugin run on the MR, and a merge reaches no installed copy until a person cuts a plugin release. Major stays a manual merge.",
+      "matchManagers": ["pep621", "npm", "custom.regex"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": false
+    },
+    {
+      "description": "One Python version in two places: plugins/homelab/server/.python-version (what uv runs locally and in the plugin) and the -python3.X suffix of the CI uv image. Renovate keeps an image tag's suffix, so it cannot move them together; a lone .python-version bump would leave test:python without its interpreter. Upgrade Python by hand in both.",
+      "matchManagers": ["pyenv"],
+      "matchDepNames": ["python"],
+      "enabled": false
+    },
+    {
+      "description": "The CI uv image soaks like the dependencies it locks. GHCR publishes no release dates, so the soak cannot be checked and timestamp-optional lets the MR open (with timestamp-required Renovate would create no branch and only list it on the Dependency Dashboard). test:python runs inside this image on the MR.",
+      "matchDatasources": ["docker"],
+      "matchDepNames": ["ghcr.io/astral-sh/uv"],
+      "minimumReleaseAge": "14 days",
+      "minimumReleaseAgeBehaviour": "timestamp-optional"
+    }
+  ]
+}

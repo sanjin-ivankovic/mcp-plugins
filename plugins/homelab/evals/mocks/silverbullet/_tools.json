@@ -1,0 +1,280 @@
+{
+  "tools": [
+    {
+      "annotations": {
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true,
+        "readOnlyHint": false
+      },
+      "description": "Write a Markdown page to the SilverBullet space and return its URL. page is the page name (folders with /, no .md needed). Refuses to replace an existing page unless overwrite is true.",
+      "inputSchema": {
+        "properties": {
+          "content": {
+            "description": "The whole page as Markdown",
+            "title": "Content",
+            "type": "string"
+          },
+          "overwrite": {
+            "default": false,
+            "description": "Replace the page if it exists; it is not kept",
+            "title": "Overwrite",
+            "type": "boolean"
+          },
+          "page": {
+            "description": "Page name: folders separated by /, no .md",
+            "title": "Page",
+            "type": "string"
+          }
+        },
+        "required": [
+          "page",
+          "content"
+        ],
+        "title": "silverbullet_write_pageArguments",
+        "type": "object"
+      },
+      "name": "silverbullet_write_page",
+      "outputSchema": {
+        "properties": {
+          "action": {
+            "enum": [
+              "created",
+              "overwritten",
+              "appended"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "etag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Etag"
+          },
+          "page": {
+            "title": "Page",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "page",
+          "url",
+          "action",
+          "etag"
+        ],
+        "title": "PageWrite",
+        "type": "object"
+      },
+      "title": "Write scratch page"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true,
+        "readOnlyHint": false
+      },
+      "description": "Append Markdown to the end of a SilverBullet page (created if missing) and return its URL. The write is conditional on the page not having changed since it was read.",
+      "inputSchema": {
+        "properties": {
+          "content": {
+            "description": "Markdown to add at the end",
+            "title": "Content",
+            "type": "string"
+          },
+          "page": {
+            "description": "Page name: folders separated by /, no .md",
+            "title": "Page",
+            "type": "string"
+          }
+        },
+        "required": [
+          "page",
+          "content"
+        ],
+        "title": "silverbullet_append_pageArguments",
+        "type": "object"
+      },
+      "name": "silverbullet_append_page",
+      "outputSchema": {
+        "properties": {
+          "action": {
+            "enum": [
+              "created",
+              "overwritten",
+              "appended"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "etag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Etag"
+          },
+          "page": {
+            "title": "Page",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "page",
+          "url",
+          "action",
+          "etag"
+        ],
+        "title": "PageWrite",
+        "type": "object"
+      },
+      "title": "Append to scratch page"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "One SilverBullet page as Markdown, by page name.",
+      "inputSchema": {
+        "properties": {
+          "page": {
+            "description": "Page name: folders separated by /, no .md",
+            "title": "Page",
+            "type": "string"
+          }
+        },
+        "required": [
+          "page"
+        ],
+        "title": "silverbullet_read_pageArguments",
+        "type": "object"
+      },
+      "name": "silverbullet_read_page",
+      "outputSchema": {
+        "properties": {
+          "content": {
+            "title": "Content",
+            "type": "string"
+          },
+          "last_modified": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Modified"
+          },
+          "page": {
+            "title": "Page",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "page",
+          "url",
+          "last_modified",
+          "content"
+        ],
+        "title": "Page",
+        "type": "object"
+      },
+      "title": "Read scratch page"
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true,
+        "readOnlyHint": true
+      },
+      "description": "Pages in the SilverBullet space, most recently modified first.",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "default": 30,
+            "description": "Pages to return, 1-500",
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "title": "silverbullet_list_pagesArguments",
+        "type": "object"
+      },
+      "name": "silverbullet_list_pages",
+      "outputSchema": {
+        "$defs": {
+          "PageRow": {
+            "properties": {
+              "last_modified": {
+                "title": "Last Modified"
+              },
+              "page": {
+                "title": "Page",
+                "type": "string"
+              }
+            },
+            "required": [
+              "page",
+              "last_modified"
+            ],
+            "title": "PageRow",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/$defs/PageRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "count",
+          "truncated",
+          "items"
+        ],
+        "title": "PageList",
+        "type": "object"
+      },
+      "title": "List scratch pages"
+    }
+  ]
+}

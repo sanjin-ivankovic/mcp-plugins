@@ -1,0 +1,1 @@
+{"project": "{{input.project}}", "job_id": 9002, "lines_total": 412, "lines_matched": 3, "truncated": false, "output": "$ python3 .ci/scripts/validate_app.py apps/user/scratch-web\nERROR apps/user/scratch-web: container scratch-web has no memory request\nvalidate:apps failed: 1 app"}
